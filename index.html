@@ -1687,11 +1687,11 @@
       });
       
       const printWindow = window.open("", "_blank");
-      printWindow.document.write(\`
+      printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Etiqueta de Caja - \${boxName}</title>
+          <title>Etiqueta de Caja - ${boxName}</title>
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
           <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1792,7 +1792,7 @@
           <div class="border-container">
             <div class="header">
               <div class="badge-scout">CAMPAMENTO SCOUT 2026</div>
-              <div class="box-title">📦 \${boxName}</div>
+              <div class="box-title">📦 ${boxName}</div>
             </div>
             <div class="content">
               <table>
@@ -1804,7 +1804,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  \${rowsHtml}
+                  ${rowsHtml}
                 </tbody>
               </table>
             </div>
@@ -1820,7 +1820,7 @@
           </script>
         </body>
         </html>
-      \`);
+      `);
       printWindow.document.close();
     }
 
