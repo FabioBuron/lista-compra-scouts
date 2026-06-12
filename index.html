@@ -978,7 +978,7 @@
     </div>
 
     <!-- ── MODO LISTA DE LA COMPRA ── -->
-    <section id="sec-compra" class="section">
+    <section id="sec-compra" class="section active">
       <!-- Estadísticas -->
       <div class="dashboard-grid">
         <div class="stat-card">
@@ -1197,6 +1197,8 @@
             renderMaterials();
             renderCajasMode();
             showToast("Datos sincronizados en tiempo real", "success");
+            // Activar explícitamente la pestaña activa inicial para forzar la visualización correcta
+            switchTab(activeTab);
           }
         })
         .catch(err => {
@@ -1243,13 +1245,28 @@
     }
 
     // ── VISTAS Y FILTROS ──
-    function switchTab(tab) {
+    function switchTab(tab, btnEl = null) {
       activeTab = tab;
-      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-      event.target.classList.add("active");
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      tabButtons.forEach(btn => btn.classList.remove("active"));
+      
+      let targetBtn = btnEl;
+      if (!targetBtn && window.event && window.event.currentTarget) {
+        targetBtn = window.event.currentTarget;
+      }
+      if (!targetBtn) {
+        targetBtn = Array.from(tabButtons).find(btn => btn.getAttribute("onclick") && btn.getAttribute("onclick").includes(`'${tab}'`));
+      }
+      
+      if (targetBtn) {
+        targetBtn.classList.add("active");
+      }
       
       document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
-      document.getElementById(`sec-${tab}`).classList.add("active");
+      const targetSec = document.getElementById(`sec-${tab}`);
+      if (targetSec) {
+        targetSec.classList.add("active");
+      }
       
       if (tab === "cajas") {
         renderCajasMode();
