@@ -869,15 +869,69 @@
 
     /* Responsive */
     @media (max-width: 768px) {
+      header {
+        position: sticky;
+        top: 0;
+        padding: 4px 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      }
       .header-container {
-        flex-direction: column;
-        gap: 16px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        gap: 8px;
+      }
+      .brand h1 {
+        font-size: 18px;
+      }
+      .logo-emoji {
+        font-size: 22px;
+      }
+      .tabs-wrapper {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border);
+        border-radius: 0;
+        padding: 10px 16px;
+        margin: 0;
+        justify-content: space-around;
+        z-index: 1000;
+        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.08);
+      }
+      .tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 10px;
+        font-size: 13px;
+        border-radius: 12px;
+      }
+      main {
+        padding: 16px 16px 90px 16px; /* Margen inferior para no solapar con la barra de navegación */
       }
       .filters-bar {
         flex-direction: column;
+        gap: 10px;
       }
       .filter-item, .search-input-wrapper {
         width: 100%;
+      }
+      .materials-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+      }
+      .cajas-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px;
+      }
+      .config-card {
+        margin: 30px auto;
+        padding: 20px;
       }
     }
   </style>
@@ -1381,6 +1435,21 @@
     }
 
     // ── MODO CAJAS LOGÍSTICA ──
+    const UNIT_BOX_MAP = {
+      "Caja Castores": "castores",
+      "Caja Lobatos": "lobatos",
+      "Caja Exploradores": "exploradores",
+      "Caja Pioneros": "pioneros",
+      "Caja Rutas": "rutas"
+    };
+
+    function parseBoxQty(val) {
+      if (!val) return 0;
+      let clean = val.toString().replace('=', '').trim();
+      let num = parseFloat(clean);
+      return isNaN(num) ? 0 : num;
+    }
+
     function renderCajasMode() {
       const boxes = getCustomBoxes();
       
@@ -1389,20 +1458,69 @@
         container.innerHTML = "";
         
         boxes.forEach(box => {
-          // Filtrar items en esta caja
-          const itemsInBox = appData.repartoCajas.filter(r => r.caja === box);
+          const unitKey = UNIT_BOX_MAP[box];
+          const boxMaterialsMap = {};
+          
+          // 1. Cargar materiales de la unidad por defecto
+          if (unitKey) {
+            appData.materiales.forEach(m => {
+              const defQty = parseBoxQty(m[unitKey]);
+              if (defQty > 0) {
+                boxMaterialsMap[m.material] = {
+                  material: m.material,
+                  cantidadDefault: defQty,
+                  cantidadManual: 0
+                };
+              }
+            });
+          }
+          
+          // 2. Cargar/sumar repartos manuales del servidor
+          const manualAllocations = appData.repartoCajas.filter(r => r.caja === box);
+          manualAllocations.forEach(r => {
+            const manualQty = parseInt(r.cantidad);
+            if (boxMaterialsMap[r.material]) {
+              boxMaterialsMap[r.material].cantidadManual = manualQty;
+            } else {
+              boxMaterialsMap[r.material] = {
+                material: r.material,
+                cantidadDefault: 0,
+                cantidadManual: manualQty
+              };
+            }
+          });
+          
+          // 3. Filtrar y ordenar materiales de la caja
+          const itemsInBox = Object.values(boxMaterialsMap).filter(item => {
+            return (item.cantidadDefault + item.cantidadManual) > 0;
+          });
+          itemsInBox.sort((a, b) => a.material.localeCompare(b.material));
           
           const card = document.createElement("div");
           card.className = "caja-card";
           
           let itemsHtml = "";
           itemsInBox.forEach(item => {
+            const totalQty = item.cantidadDefault + item.cantidadManual;
+            let qtyDetail = "";
+            if (item.cantidadDefault > 0 && item.cantidadManual > 0) {
+              qtyDetail = `<span style="font-size:10px; color:var(--text-muted); margin-left:4px;">(${item.cantidadDefault} base + ${item.cantidadManual} extra)</span>`;
+            } else if (item.cantidadDefault > 0) {
+              qtyDetail = `<span style="font-size:10px; color:var(--text-muted); margin-left:4px;">(base)</span>`;
+            } else {
+              qtyDetail = `<span style="font-size:10px; color:var(--text-muted); margin-left:4px;">(extra)</span>`;
+            }
+
             itemsHtml += `
-              <div class="caja-item-row">
-                <span class="caja-item-name" title="${item.material}">${item.material}</span>
-                <div class="qty-controls">
-                  <button class="btn-qty" onclick="changeBoxQty('${escapeHtml(item.material)}', '${escapeHtml(box)}', -1)">-</button>
-                  <span class="caja-item-qty">${item.cantidad}</span>
+              <div class="caja-item-row" style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+                <span class="caja-item-name" title="${item.material}" style="font-size:13px; font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+                  ${item.material} ${qtyDetail}
+                </span>
+                <div class="qty-controls" style="display:flex; align-items:center; gap:8px;">
+                  <button class="btn-qty" 
+                          ${item.cantidadManual <= 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''} 
+                          onclick="changeBoxQty('${escapeHtml(item.material)}', '${escapeHtml(box)}', -1)">-</button>
+                  <span class="caja-item-qty" style="font-weight:700; min-width:16px; text-align:center; font-size:13.5px;">${totalQty}</span>
                   <button class="btn-qty" onclick="changeBoxQty('${escapeHtml(item.material)}', '${escapeHtml(box)}', 1)">+</button>
                 </div>
               </div>
@@ -1410,16 +1528,20 @@
           });
           
           card.innerHTML = `
-            <div class="caja-header">
-              <span class="caja-title">📦 ${box}</span>
-              <span class="caja-item-count">${itemsInBox.length} art.</span>
+            <div class="caja-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+              <div style="display:flex; flex-direction:column;">
+                <span class="caja-title" style="font-size:16px; font-weight:700;">📦 ${box}</span>
+                <span style="font-size:11px; color:var(--text-muted);">${unitKey ? 'Contiene programación de la unidad' : 'Caja manual'}</span>
+              </div>
+              <span class="caja-item-count" style="background:var(--border); padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;">${itemsInBox.length} art.</span>
             </div>
-            <div class="caja-items-list">
+            <div class="caja-items-list" style="max-height: 250px; overflow-y: auto; margin-bottom:12px; padding-right:4px;">
               ${itemsInBox.length > 0 ? itemsHtml : '<p style="color: var(--text-muted); font-size:12px; text-align:center; padding: 20px;">Caja vacía. Agrega materiales.</p>'}
             </div>
-            <div class="caja-actions">
-              <button class="btn" style="flex: 1;" onclick="openAddToBoxModal('${escapeHtml(box)}')">Agregar Material</button>
-              <button class="btn btn-outline" style="width: 42px; padding: 0;" onclick="deleteCustomBox('${escapeHtml(box)}')" title="Borrar Caja">🗑️</button>
+            <div class="caja-actions" style="display:flex; gap:8px; margin-top:auto;">
+              <button class="btn" style="flex: 1; padding: 8px 12px; font-size:13px;" onclick="openAddToBoxModal('${escapeHtml(box)}')">Agregar</button>
+              <button class="btn btn-outline" style="padding: 8px; display:flex; justify-content:center; align-items:center; font-size:14px; width:40px; height:36px;" onclick="printBoxLabel('${escapeHtml(box)}')" title="Imprimir etiqueta A4">🖨️</button>
+              <button class="btn btn-outline" style="width:36px; height:36px; padding: 0; display:flex; justify-content:center; align-items:center;" onclick="deleteCustomBox('${escapeHtml(box)}')" title="Borrar Caja">🗑️</button>
             </div>
           `;
           
@@ -1431,13 +1553,46 @@
         container.innerHTML = "";
         
         appData.materiales.forEach(m => {
-          // Obtener reparto de este material
-          const allocations = appData.repartoCajas.filter(r => r.material === m.material);
-          const totalPacked = allocations.reduce((acc, curr) => acc + parseInt(curr.cantidad), 0);
+          const materialAllocationsMap = {};
           
-          // Evaluar cantidad recomendada estimada
+          // 1. Cargar repartos virtuales por defecto (unidades)
+          boxes.forEach(box => {
+            const unitKey = UNIT_BOX_MAP[box];
+            if (unitKey) {
+              const defQty = parseBoxQty(m[unitKey]);
+              if (defQty > 0) {
+                materialAllocationsMap[box] = {
+                  caja: box,
+                  cantidadDefault: defQty,
+                  cantidadManual: 0
+                };
+              }
+            }
+          });
+          
+          // 2. Sumar asignaciones manuales del servidor
+          const manualAllocations = appData.repartoCajas.filter(r => r.material === m.material);
+          manualAllocations.forEach(r => {
+            const manualQty = parseInt(r.cantidad);
+            if (materialAllocationsMap[r.caja]) {
+              materialAllocationsMap[r.caja].cantidadManual = manualQty;
+            } else {
+              materialAllocationsMap[r.caja] = {
+                caja: r.caja,
+                cantidadDefault: 0,
+                cantidadManual: manualQty
+              };
+            }
+          });
+          
+          const allocations = Object.values(materialAllocationsMap).filter(a => {
+            return (a.cantidadDefault + a.cantidadManual) > 0;
+          });
+          
+          const totalPacked = allocations.reduce((acc, curr) => acc + curr.cantidadDefault + curr.cantidadManual, 0);
+          
           let recQty = parseInt(m.cantidadRecomendada);
-          if (isNaN(recQty)) recQty = 0; // Fórmulas de Excel devolverán string o número dependiendo del estado
+          if (isNaN(recQty)) recQty = 0;
           
           const progressPct = recQty > 0 ? Math.min(Math.round((totalPacked / recQty) * 100), 100) : (totalPacked > 0 ? 100 : 0);
           
@@ -1446,32 +1601,227 @@
           
           let distHtml = "";
           allocations.forEach(a => {
+            const totalQty = a.cantidadDefault + a.cantidadManual;
+            let detail = "";
+            let deleteBtn = "";
+            
+            if (a.cantidadDefault > 0 && a.cantidadManual > 0) {
+              detail = ` (${a.cantidadDefault} base + ${a.cantidadManual} extra)`;
+              deleteBtn = `<span style="cursor:pointer;color:red;margin-left:6px;font-weight:700;" onclick="changeBoxQty('${escapeHtml(m.material)}', '${escapeHtml(a.caja)}', -${a.cantidadManual})" title="Borrar cantidad extra">×</span>`;
+            } else if (a.cantidadDefault > 0) {
+              detail = ` (base)`;
+            } else {
+              detail = ` (extra)`;
+              deleteBtn = `<span style="cursor:pointer;color:red;margin-left:6px;font-weight:700;" onclick="changeBoxQty('${escapeHtml(m.material)}', '${escapeHtml(a.caja)}', -${a.cantidadManual})" title="Sacar de la caja">×</span>`;
+            }
+            
             distHtml += `
-              <div class="distribution-badge">
-                📦 ${a.caja}: <strong>${a.cantidad}</strong>
-                <span style="cursor:pointer;color:red;margin-left:4px;" onclick="changeBoxQty('${escapeHtml(m.material)}', '${escapeHtml(a.caja)}', -${a.cantidad})">×</span>
+              <div class="distribution-badge" style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.05); padding:4px 8px; border-radius:8px; font-size:12px; margin:2px;">
+                📦 ${a.caja}: <strong>${totalQty}</strong>${detail}${deleteBtn}
               </div>
             `;
           });
           
           card.innerHTML = `
-            <div class="reparto-header">
-              <span class="val-bold" style="flex:1;">${m.material}</span>
-              <span class="label-muted" style="font-size:12px;">Meta: ${m.cantidadRecomendada || "S/E"} (Repartido: <strong>${totalPacked}</strong>)</span>
+            <div class="reparto-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="val-bold" style="flex:1; font-weight:600; font-size:14.5px;">${m.material}</span>
+              <span class="label-muted" style="font-size:12px;">Meta: ${m.cantidadRecomendada || "S/E"} (En Cajas: <strong>${totalPacked}</strong>)</span>
             </div>
             ${recQty > 0 ? `
-              <div class="reparto-progress-bar">
-                <div class="reparto-progress-fill" style="width: ${progressPct}%;"></div>
+              <div class="reparto-progress-bar" style="height:6px; background:var(--border); border-radius:3px; overflow:hidden; margin:6px 0;">
+                <div class="reparto-progress-fill" style="width: ${progressPct}%; height:100%; background:var(--success);"></div>
               </div>
             ` : ''}
-            <div class="reparto-distribution">
-              ${allocations.length > 0 ? distHtml : '<span style="color: var(--text-muted); italic; font-size:12px;">Sin meter en ninguna caja aún.</span>'}
+            <div class="reparto-distribution" style="display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;">
+              ${allocations.length > 0 ? distHtml : '<span style="color: var(--text-muted); font-style:italic; font-size:12px;">Sin meter en ninguna caja aún.</span>'}
             </div>
           `;
           
           container.appendChild(card);
         });
       }
+    }
+
+    function printBoxLabel(boxName) {
+      const unitKey = UNIT_BOX_MAP[boxName];
+      const boxMaterialsMap = {};
+      
+      // 1. Cargar por defecto
+      if (unitKey) {
+        appData.materiales.forEach(m => {
+          const defQty = parseBoxQty(m[unitKey]);
+          if (defQty > 0) {
+            boxMaterialsMap[m.material] = { material: m.material, qty: defQty };
+          }
+        });
+      }
+      
+      // 2. Sumar manuales
+      const manualAllocations = appData.repartoCajas.filter(r => r.caja === boxName);
+      manualAllocations.forEach(r => {
+        const manualQty = parseInt(r.cantidad);
+        if (boxMaterialsMap[r.material]) {
+          boxMaterialsMap[r.material].qty += manualQty;
+        } else {
+          boxMaterialsMap[r.material] = { material: r.material, qty: manualQty };
+        }
+      });
+      
+      const items = Object.values(boxMaterialsMap).filter(i => i.qty > 0);
+      items.sort((a, b) => a.material.localeCompare(b.material));
+      
+      if (items.length === 0) {
+        showToast("La caja está vacía, no hay nada que imprimir", "error");
+        return;
+      }
+      
+      let rowsHtml = "";
+      items.forEach(item => {
+        rowsHtml += `
+          <tr>
+            <td class="check-col"><div class="checkbox-print"></div></td>
+            <td style="font-weight: 500;">${item.material}</td>
+            <td class="qty-col">${item.qty}</td>
+          </tr>
+        `;
+      });
+      
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(\`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Etiqueta de Caja - \${boxName}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 15mm;
+            }
+            body {
+              font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+              color: #0f172a;
+              margin: 0;
+              padding: 0;
+              height: 100vh;
+              display: flex;
+              flex-direction: column;
+              box-sizing: border-box;
+            }
+            .border-container {
+              border: 5px solid #0f172a;
+              padding: 30px;
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+              border-radius: 20px;
+              background: #fff;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 4px solid #0f172a;
+              padding-bottom: 20px;
+              margin-bottom: 25px;
+            }
+            .badge-scout {
+              font-size: 18px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 3px;
+              color: #4f46e5;
+            }
+            .box-title {
+              font-size: 48px;
+              font-weight: 800;
+              margin: 10px 0 0 0;
+              color: #0f172a;
+            }
+            .content {
+              flex-grow: 1;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 15px;
+            }
+            th {
+              border-bottom: 3px solid #0f172a;
+              padding: 12px;
+              text-align: left;
+              font-size: 18px;
+              text-transform: uppercase;
+              color: #475569;
+            }
+            td {
+              padding: 14px 12px;
+              border-bottom: 1px solid #cbd5e1;
+              font-size: 18px;
+            }
+            .qty-col {
+              width: 90px;
+              text-align: center;
+              font-weight: 800;
+              font-size: 22px;
+              color: #0f172a;
+            }
+            .check-col {
+              width: 60px;
+              text-align: center;
+            }
+            .checkbox-print {
+              width: 24px;
+              height: 24px;
+              border: 3px solid #0f172a;
+              border-radius: 6px;
+              display: inline-block;
+              vertical-align: middle;
+            }
+            .footer {
+              text-align: center;
+              border-top: 3px solid #0f172a;
+              padding-top: 20px;
+              font-size: 14px;
+              font-weight: 600;
+              color: #64748b;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="border-container">
+            <div class="header">
+              <div class="badge-scout">CAMPAMENTO SCOUT 2026</div>
+              <div class="box-title">📦 \${boxName}</div>
+            </div>
+            <div class="content">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="check-col">Ok</th>
+                    <th>Material / Artículo</th>
+                    <th class="qty-col">Cant.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  \${rowsHtml}
+                </tbody>
+              </table>
+            </div>
+            <div class="footer">
+              Sincronizado en tiempo real • Kolkaltilla 2026
+            </div>
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+        </html>
+      \`);
+      printWindow.document.close();
     }
 
     // ── ACCIONES DE CAJAS (API SYNC) ──
