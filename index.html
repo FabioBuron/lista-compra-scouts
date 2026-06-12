@@ -1346,7 +1346,7 @@
         }
         if (!desgloseUnidades) desgloseUnidades = `<span class="badge badge-muted">${m.quien}</span>`;
         
-        const footerContent = m.tipo === "COMPRAR" ? `
+        const footerContent = (m.tipo === "COMPRAR" || m.tipo === "YA HAY (bases) - revisar") ? `
           <label class="checkbox-buy">
             <input type="checkbox" ${m.comprado ? 'checked' : ''} onchange="togglePurchase('${escapeHtml(m.material)}', this)">
             <span class="checkmark"></span>
