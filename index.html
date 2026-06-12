@@ -791,6 +791,68 @@
     
     .fab-btn:active {
       transform: scale(0.95);
+    }    /* Panel Flotante de Censo */
+    .censo-panel {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      width: 280px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      z-index: 150;
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .censo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    
+    .censo-header h4 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    
+    .censo-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+    
+    .censo-row-input {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .input-text-mini {
+      width: 70px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .input-text-mini:focus {
+      border-color: var(--primary);
+      outline: none;
     }
 
     /* ── MODALS ── */
@@ -988,6 +1050,7 @@
 
       <div class="nav-actions">
         <button class="btn-circle" onclick="toggleTheme()" title="Cambiar tema">🌓</button>
+        <button class="btn-circle" onclick="toggleCensoPanel()" title="Censo de participantes">👥</button>
         <button class="btn-circle" onclick="openConfigModal()" title="Configurar API">⚙️</button>
       </div>
     </div>
@@ -995,6 +1058,43 @@
 
   <!-- MAIN CONTAINER -->
   <main>
+    <!-- Panel Flotante de Censo de Participantes -->
+    <div class="censo-panel" id="censo-panel" style="display: none;">
+      <div class="censo-header">
+        <h4>👥 Censo de Unidades</h4>
+        <button class="censo-close" onclick="toggleCensoPanel()">×</button>
+      </div>
+      <div class="censo-body">
+        <div class="censo-row-input">
+          <span class="badge badge-castores">Castores</span>
+          <input type="number" id="censo-castores" class="input-text-mini" value="0" min="0" onchange="saveCensoUnit('CASTORES', this.value)">
+        </div>
+        <div class="censo-row-input">
+          <span class="badge badge-lobatos">Lobatos</span>
+          <input type="number" id="censo-lobatos" class="input-text-mini" value="0" min="0" onchange="saveCensoUnit('LOBATOS', this.value)">
+        </div>
+        <div class="censo-row-input">
+          <span class="badge badge-tropa">Tropa</span>
+          <input type="number" id="censo-exploradores" class="input-text-mini" value="0" min="0" onchange="saveCensoUnit('EXPLORADORES', this.value)">
+        </div>
+        <div class="censo-row-input">
+          <span class="badge badge-pioneros">Pioneros</span>
+          <input type="number" id="censo-pioneros" class="input-text-mini" value="0" min="0" onchange="saveCensoUnit('PIONEROS', this.value)">
+        </div>
+        <div class="censo-row-input">
+          <span class="badge badge-rutas">Rutas P.</span>
+          <input type="number" id="censo-rutas-pandora" class="input-text-mini" value="0" min="0" onchange="saveCensoUnit('RUTAS PANDORA', this.value)">
+        </div>
+        <div class="censo-row-input">
+          <span class="badge badge-rutas">Rutas Í.</span>
+          <input type="number" id="censo-rutas-icaro" class="input-text-mini" value="0" min="0" onchange="saveCensoUnit('RUTAS ICARO', this.value)">
+        </div>
+      </div>
+      <div style="font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 8px;">
+        Se guarda y recalcula en Google Sheets
+      </div>
+    </div>
+
     <!-- Config Board (si no hay API URL) -->
     <div id="config-board" class="config-card" style="display: none;">
       <h2>Configura tu Google Sheets API</h2>
@@ -1319,6 +1419,7 @@
             renderDashboard();
             renderMaterials();
             renderCajasMode();
+            renderCenso();
             showToast("Datos sincronizados en tiempo real", "success");
             // Activar explícitamente la pestaña activa inicial para forzar la visualización correcta
             switchTab(activeTab);
@@ -2078,8 +2179,55 @@
               renderDashboard();
               renderMaterials();
               renderCajasMode();
+              renderCenso();
             }
           }
+        });
+    }
+
+    // Gestión del Panel Flotante de Censo
+    function toggleCensoPanel() {
+      const panel = document.getElementById("censo-panel");
+      const isVisible = panel.style.display === "block";
+      panel.style.display = isVisible ? "none" : "block";
+      if (!isVisible) {
+        renderCenso();
+      }
+    }
+
+    function renderCenso() {
+      if (!appData.censo) return;
+      document.getElementById("censo-castores").value = appData.censo.CASTORES || 0;
+      document.getElementById("censo-lobatos").value = appData.censo.LOBATOS || 0;
+      document.getElementById("censo-exploradores").value = appData.censo.EXPLORADORES || 0;
+      document.getElementById("censo-pioneros").value = appData.censo.PIONEROS || 0;
+      document.getElementById("censo-rutas-pandora").value = appData.censo["RUTAS PANDORA"] || 0;
+      document.getElementById("censo-rutas-icaro").value = appData.censo["RUTAS ICARO"] || 0;
+    }
+
+    function saveCensoUnit(unit, value) {
+      if (!API_URL) return;
+      const count = parseInt(value, 10);
+      if (isNaN(count) || count < 0) return;
+      
+      showToast(`Actualizando censo de ${unit}...`, "warning");
+      
+      const url = `${API_URL}?action=update_censo&unidad=${encodeURIComponent(unit)}&cantidad=${count}`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            showToast(`Censo de ${unit} actualizado a ${count}`, "success");
+            // Volver a cargar todos los datos para que Sheets aplique las fórmulas basadas en CONFIG
+            fetchData();
+          } else {
+            showToast("Error de API al actualizar censo", "error");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showToast("Error de conexión al guardar censo", "error");
         });
     }
 

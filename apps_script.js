@@ -30,6 +30,10 @@ function doGet(e) {
     );
   }
   
+  if (action === 'update_censo') {
+    return updateCenso(e.parameter.unidad, e.parameter.cantidad);
+  }
+  
   // Por defecto, leer todos los datos
   return readAllData();
 }
@@ -62,6 +66,10 @@ function doPost(e) {
       data.tipo,
       data.detalle
     );
+  }
+  
+  if (data.action === 'update_censo') {
+    return updateCenso(data.unidad, data.cantidad);
   }
   
   return readAllData();
@@ -133,9 +141,24 @@ function readAllData() {
     }
   }
   
+  // 3. Leer Configuración (censo de niños por unidad)
+  var sheetConfig = ss.getSheetByName("CONFIG");
+  var censo = {};
+  if (sheetConfig) {
+    var valuesConfig = sheetConfig.getDataRange().getValues();
+    for (var k = 1; k < valuesConfig.length; k++) {
+      var unitName = valuesConfig[k][0];
+      var count = parseInt(valuesConfig[k][1]);
+      if (unitName) {
+        censo[unitName.toString().trim().toUpperCase()] = isNaN(count) ? 0 : count;
+      }
+    }
+  }
+
   return jsonResponse({
     materiales: materiales,
-    repartoCajas: repartoCajas
+    repartoCajas: repartoCajas,
+    censo: censo
   });
 }
 
@@ -268,4 +291,26 @@ function addMaterial(material, categoria, castores, lobatos, exploradores, pione
   ]);
   
   return jsonResponse({ success: true, material: material });
+}
+
+// ── ACTUALIZAR CENSO DE PARTICIPANTES ──
+function updateCenso(unidad, cantidad) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("CONFIG");
+  if (!sheet) return jsonResponse({ error: "Hoja CONFIG no encontrada" });
+  
+  var values = sheet.getDataRange().getValues();
+  var found = false;
+  var qtyVal = parseInt(cantidad, 10);
+  if (isNaN(qtyVal)) qtyVal = 0;
+  
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] && values[i][0].toString().trim().toUpperCase() === unidad.toString().trim().toUpperCase()) {
+      sheet.getRange(i + 1, 2).setValue(qtyVal); // Columna B (2)
+      found = true;
+      break;
+    }
+  }
+  
+  return jsonResponse({ success: found, unidad: unidad, cantidad: qtyVal });
 }
