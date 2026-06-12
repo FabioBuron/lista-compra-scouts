@@ -756,6 +756,34 @@
       align-items: center;
       gap: 6px;
       font-weight: 600;
+    }    /* Floating Action Button (FAB) */
+    .fab-btn {
+      position: fixed;
+      bottom: 90px; /* Situado encima de la barra inferior fija en móvil */
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 90;
+      transition: var(--transition);
+    }
+    
+    .fab-btn:hover {
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+    
+    .fab-btn:active {
+      transform: scale(0.95);
     }
 
     /* ── MODALS ── */
@@ -1047,6 +1075,9 @@
 
       <!-- Grid de Tarjetas -->
       <div class="materials-grid" id="materials-container"></div>
+
+      <!-- Botón Flotante "+" para Añadir Material -->
+      <button class="fab-btn" onclick="openNewMaterialModal()" title="Añadir nuevo material">＋</button>
     </section>
 
     <!-- ── MODO LOGÍSTICA CAJAS ── -->
@@ -1126,6 +1157,77 @@
     </div>
   </div>
 
+  <!-- MODAL: Añadir Nuevo Material -->
+  <div class="modal-overlay" id="modal-new-material">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Añadir Nuevo Material</h3>
+        <button class="modal-close" onclick="closeModal('modal-new-material')">×</button>
+      </div>
+      <div class="modal-body" style="max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
+        <div class="input-group">
+          <label>Nombre del Material *</label>
+          <input type="text" id="new-mat-name" class="input-text" placeholder="Ej: Cuerdas de pita de 8mm">
+        </div>
+        <div class="input-group">
+          <label>Categoría *</label>
+          <select id="new-mat-cat" class="input-text">
+            <option value="Construccion/herramientas">🛠️ Construcción / Herramientas</option>
+            <option value="Papeleria/manualidades">🎨 Papelería / Manualidades</option>
+            <option value="Juegos/deporte">⚽ Juegos / Deporte</option>
+            <option value="Cocina/menaje">🍳 Cocina / Menaje</option>
+            <option value="Iluminacion/electronica">💡 Iluminación / Electrónica</option>
+            <option value="Higiene/limpieza">🧹 Higiene / Limpieza</option>
+            <option value="Textil/disfraces">👕 Textil / Disfraces</option>
+            <option value="Impresiones/documentacion">📄 Impresiones</option>
+            <option value="Equipo campamento">⛺ Equipo Campamento</option>
+            <option value="Otros">📦 Otros</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Tipo / Responsabilidad *</label>
+          <select id="new-mat-tipo" class="input-text">
+            <option value="COMPRAR">🛒 COMPRAR</option>
+            <option value="YA HAY (bases) - revisar">🏠 YA HAY EN BASES</option>
+            <option value="LO TRAE EL NINO">🎒 LO TRAE EL NIÑO</option>
+          </select>
+        </div>
+        
+        <div style="font-weight: 600; font-size: 13px; color: var(--text-muted); margin-top: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+          Cantidades por Unidad (Opcional)
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          <div class="input-group">
+            <label>Castores</label>
+            <input type="number" id="new-mat-qty-castores" class="input-text" min="0" placeholder="0">
+          </div>
+          <div class="input-group">
+            <label>Lobatos</label>
+            <input type="number" id="new-mat-qty-lobatos" class="input-text" min="0" placeholder="0">
+          </div>
+          <div class="input-group">
+            <label>Tropa / Exploradores</label>
+            <input type="number" id="new-mat-qty-exploradores" class="input-text" min="0" placeholder="0">
+          </div>
+          <div class="input-group">
+            <label>Pioneros</label>
+            <input type="number" id="new-mat-qty-pioneros" class="input-text" min="0" placeholder="0">
+          </div>
+          <div class="input-group" style="grid-column: span 2;">
+            <label>Rutas</label>
+            <input type="number" id="new-mat-qty-rutas" class="input-text" min="0" placeholder="0">
+          </div>
+        </div>
+
+        <div class="input-group" style="margin-top: 6px;">
+          <label>Detalle / Actividades / Trazabilidad</label>
+          <textarea id="new-mat-detalle" class="input-text" rows="3" placeholder="Ej: Para el taller de pioneros de construcción de la balsa..."></textarea>
+        </div>
+      </div>
+      <button class="btn" onclick="saveNewMaterial()" style="margin-top: 10px;">Añadir Material</button>
+    </div>
+  </div>
+
   <!-- Contenedor de Toasts -->
   <div id="toast-container"></div>
 
@@ -1154,6 +1256,13 @@
       } else {
         fetchData();
       }
+
+      // Refresco automático en segundo plano cada 30 segundos
+      setInterval(() => {
+        if (API_URL) {
+          fetchDataBackgroundAndRender();
+        }
+      }, 30000);
     });
 
     // ── CONFIGURACIÓN DE API ──
@@ -1915,6 +2024,87 @@
           if (!data.error) {
             appData = data;
           }
+        });
+    }
+
+    // Refresco en background periódico que además re-renderiza si no hay modales abiertos
+    function fetchDataBackgroundAndRender() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            appData = data;
+            // Solo renderizar si el usuario no tiene ningún modal abierto para no interrumpir
+            const activeModal = document.querySelector(".modal-overlay.active");
+            if (!activeModal) {
+              renderDashboard();
+              renderMaterials();
+              renderCajasMode();
+            }
+          }
+        });
+    }
+
+    // Modal para Añadir Nuevo Material
+    function openNewMaterialModal() {
+      openModal("modal-new-material");
+      document.getElementById("new-mat-name").value = "";
+      document.getElementById("new-mat-cat").value = "Construccion/herramientas";
+      document.getElementById("new-mat-tipo").value = "COMPRAR";
+      document.getElementById("new-mat-qty-castores").value = "";
+      document.getElementById("new-mat-qty-lobatos").value = "";
+      document.getElementById("new-mat-qty-exploradores").value = "";
+      document.getElementById("new-mat-qty-pioneros").value = "";
+      document.getElementById("new-mat-qty-rutas").value = "";
+      document.getElementById("new-mat-detalle").value = "";
+    }
+
+    function saveNewMaterial() {
+      const name = document.getElementById("new-mat-name").value.trim();
+      const cat = document.getElementById("new-mat-cat").value;
+      const tipo = document.getElementById("new-mat-tipo").value;
+      const castores = document.getElementById("new-mat-qty-castores").value || 0;
+      const lobatos = document.getElementById("new-mat-qty-lobatos").value || 0;
+      const exploradores = document.getElementById("new-mat-qty-exploradores").value || 0;
+      const pioneros = document.getElementById("new-mat-qty-pioneros").value || 0;
+      const rutas = document.getElementById("new-mat-qty-rutas").value || 0;
+      const detalle = document.getElementById("new-mat-detalle").value.trim();
+      
+      if (!name) {
+        showToast("El nombre del material es obligatorio", "error");
+        return;
+      }
+      
+      closeModal("modal-new-material");
+      showLoader(true);
+      
+      // Enviar a la API de Google Sheets
+      const url = `${API_URL}?action=add_material` +
+                  `&material=${encodeURIComponent(name)}` +
+                  `&categoria=${encodeURIComponent(cat)}` +
+                  `&tipo=${encodeURIComponent(tipo)}` +
+                  `&castores=${castores}` +
+                  `&lobatos=${lobatos}` +
+                  `&exploradores=${exploradores}` +
+                  `&pioneros=${pioneros}` +
+                  `&rutas=${rutas}` +
+                  `&detalle=${encodeURIComponent(detalle)}`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            showToast(`"${name}" añadido a la lista con éxito`, "success");
+            fetchData(); // Recargar todos los datos para ver el nuevo elemento
+          } else {
+            showToast("Error de API: " + (res.error || "No se pudo añadir"), "error");
+            fetchData();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showToast("Error al conectar con el servidor", "error");
+          fetchData();
         });
     }
 

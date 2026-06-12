@@ -16,6 +16,20 @@ function doGet(e) {
     return updateBox(e.parameter.material, e.parameter.box, e.parameter.quantity);
   }
   
+  if (action === 'add_material') {
+    return addMaterial(
+      e.parameter.material,
+      e.parameter.categoria,
+      e.parameter.castores,
+      e.parameter.lobatos,
+      e.parameter.exploradores,
+      e.parameter.pioneros,
+      e.parameter.rutas,
+      e.parameter.tipo,
+      e.parameter.detalle
+    );
+  }
+  
   // Por defecto, leer todos los datos
   return readAllData();
 }
@@ -34,6 +48,20 @@ function doPost(e) {
   
   if (data.action === 'update_box') {
     return updateBox(data.material, data.box, data.quantity);
+  }
+  
+  if (data.action === 'add_material') {
+    return addMaterial(
+      data.material,
+      data.categoria,
+      data.castores,
+      data.lobatos,
+      data.exploradores,
+      data.pioneros,
+      data.rutas,
+      data.tipo,
+      data.detalle
+    );
   }
   
   return readAllData();
@@ -197,4 +225,47 @@ function updateCajaResumenPrincipal(ss, material) {
       break;
     }
   }
+}
+
+// ── AÑADIR NUEVO MATERIAL A LA LISTA ──
+function addMaterial(material, categoria, castores, lobatos, exploradores, pioneros, rutas, tipo, detalle) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("LISTA DE LA COMPRA");
+  if (!sheet) return jsonResponse({ error: "Hoja 'LISTA DE LA COMPRA' no encontrada" });
+  
+  // Comprobar duplicado
+  var values = sheet.getDataRange().getValues();
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] && values[i][0].toString().trim().toLowerCase() === material.toString().trim().toLowerCase()) {
+      return jsonResponse({ error: "El material ya existe en la lista" });
+    }
+  }
+  
+  // Parsear cantidades
+  var c = parseFloat(castores) || 0;
+  var l = parseFloat(lobatos) || 0;
+  var e = parseFloat(exploradores) || 0;
+  var p = parseFloat(pioneros) || 0;
+  var r = parseFloat(rutas) || 0;
+  
+  var nextRow = sheet.getLastRow() + 1;
+  // Columna C: fórmula de suma automática de las unidades
+  var formulaTotal = "=SUM(D" + nextRow + ":H" + nextRow + ")";
+  
+  sheet.appendRow([
+    material,
+    categoria,
+    formulaTotal,
+    c > 0 ? c : "",
+    l > 0 ? l : "",
+    e > 0 ? e : "",
+    p > 0 ? p : "",
+    r > 0 ? r : "",
+    tipo,
+    detalle,
+    "", // Resumen cajas vacío
+    ""  // Comprado vacío
+  ]);
+  
+  return jsonResponse({ success: true, material: material });
 }
