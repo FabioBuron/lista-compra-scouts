@@ -425,6 +425,13 @@
     .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
     .badge-muted { background: var(--caja-bg); color: var(--text-muted); }
 
+    /* Badges de Unidades Scout */
+    .badge-castores { background: rgba(234, 88, 12, 0.12); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.2); }
+    .badge-lobatos { background: rgba(234, 179, 8, 0.12); color: #b45309; border: 1px solid rgba(234, 179, 8, 0.2); }
+    .badge-tropa { background: rgba(37, 99, 235, 0.12); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.2); }
+    .badge-pioneros { background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+    .badge-rutas { background: rgba(22, 163, 74, 0.12); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.2); }
+
     .card-body {
       display: flex;
       flex-direction: column;
@@ -1443,22 +1450,22 @@
         const catBadge = getCategoryBadge(m.categoria);
         const tipoBadge = getTipoBadge(m.tipo);
         
-        // Desglose visual por unidades
+        // Desglose visual por unidades con colores scout correctos
         let desgloseUnidades = "";
         if (parseFloat(m.castores) > 0 || (m.castores && m.castores.toString().startsWith("="))) {
-          desgloseUnidades += `<span class="badge badge-primary" style="margin-bottom:2px;">Castores: ${m.castores}</span> `;
+          desgloseUnidades += `<span class="badge badge-castores" style="margin-bottom:2px;">Castores: ${m.castores}</span> `;
         }
         if (parseFloat(m.lobatos) > 0 || (m.lobatos && m.lobatos.toString().startsWith("="))) {
-          desgloseUnidades += `<span class="badge badge-warning" style="margin-bottom:2px;">Lobatos: ${m.lobatos}</span> `;
+          desgloseUnidades += `<span class="badge badge-lobatos" style="margin-bottom:2px;">Lobatos: ${m.lobatos}</span> `;
         }
         if (parseFloat(m.exploradores) > 0 || (m.exploradores && m.exploradores.toString().startsWith("="))) {
-          desgloseUnidades += `<span class="badge badge-green" style="margin-bottom:2px;">Tropa: ${m.exploradores}</span> `;
+          desgloseUnidades += `<span class="badge badge-tropa" style="margin-bottom:2px;">Tropa: ${m.exploradores}</span> `;
         }
         if (parseFloat(m.pioneros) > 0 || (m.pioneros && m.pioneros.toString().startsWith("="))) {
-          desgloseUnidades += `<span class="badge badge-muted" style="margin-bottom:2px; background:rgba(91,49,91,0.1); color:#5B315B;">Pioneros: ${m.pioneros}</span> `;
+          desgloseUnidades += `<span class="badge badge-pioneros" style="margin-bottom:2px;">Pioneros: ${m.pioneros}</span> `;
         }
         if (parseFloat(m.rutas) > 0 || (m.rutas && m.rutas.toString().startsWith("="))) {
-          desgloseUnidades += `<span class="badge badge-orange" style="margin-bottom:2px;">Rutas: ${m.rutas}</span> `;
+          desgloseUnidades += `<span class="badge badge-rutas" style="margin-bottom:2px;">Rutas: ${m.rutas}</span> `;
         }
         if (!desgloseUnidades) desgloseUnidades = `<span class="badge badge-muted">${m.quien}</span>`;
         
@@ -1632,6 +1639,22 @@
           const card = document.createElement("div");
           card.className = "caja-card";
           
+          // Asignar color de borde superior según la unidad de la caja
+          let boxColor = "var(--border)";
+          const boxLower = box.toLowerCase();
+          if (boxLower.includes("lobatos")) {
+            boxColor = "#eab308"; // Amarillo
+          } else if (boxLower.includes("exploradores") || boxLower.includes("tropa")) {
+            boxColor = "#2563eb"; // Azul
+          } else if (boxLower.includes("pioneros")) {
+            boxColor = "#dc2626"; // Rojo
+          } else if (boxLower.includes("castores")) {
+            boxColor = "#ea580c"; // Naranja
+          } else if (boxLower.includes("rutas")) {
+            boxColor = "#16a34a"; // Verde
+          }
+          card.style.borderTop = `4px solid ${boxColor}`;
+          
           let itemsHtml = "";
           itemsInBox.forEach(item => {
             const totalQty = item.cantidadDefault + item.cantidadManual;
@@ -1748,8 +1771,23 @@
               deleteBtn = `<span style="cursor:pointer;color:red;margin-left:6px;font-weight:700;" onclick="changeBoxQty('${escapeHtml(m.material)}', '${escapeHtml(a.caja)}', -${a.cantidadManual})" title="Sacar de la caja">×</span>`;
             }
             
+            // Estilo por unidad para el badge de distribución de cajas
+            let badgeStyle = "background: rgba(0,0,0,0.05); color: var(--text);";
+            const cLower = a.caja.toLowerCase();
+            if (cLower.includes("lobatos")) {
+              badgeStyle = "background: rgba(234, 179, 8, 0.12); color: #b45309; border: 1px solid rgba(234, 179, 8, 0.2);";
+            } else if (cLower.includes("exploradores") || cLower.includes("tropa")) {
+              badgeStyle = "background: rgba(37, 99, 235, 0.12); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.2);";
+            } else if (cLower.includes("pioneros")) {
+              badgeStyle = "background: rgba(220, 38, 38, 0.12); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.2);";
+            } else if (cLower.includes("castores")) {
+              badgeStyle = "background: rgba(234, 88, 12, 0.12); color: #ea580c; border: 1px solid rgba(234, 88, 12, 0.2);";
+            } else if (cLower.includes("rutas")) {
+              badgeStyle = "background: rgba(22, 163, 74, 0.12); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.2);";
+            }
+
             distHtml += `
-              <div class="distribution-badge" style="display:inline-flex; align-items:center; background:rgba(0,0,0,0.05); padding:4px 8px; border-radius:8px; font-size:12px; margin:2px;">
+              <div class="distribution-badge" style="display:inline-flex; align-items:center; padding:4px 8px; border-radius:8px; font-size:12px; margin:2px; ${badgeStyle}">
                 📦 ${a.caja}: <strong>${totalQty}</strong>${detail}${deleteBtn}
               </div>
             `;
