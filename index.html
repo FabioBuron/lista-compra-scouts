@@ -1812,16 +1812,16 @@
               Sincronizado en tiempo real • Kolkaltilla 2026
             </div>
           </div>
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() { window.close(); }, 500);
-            };
-          </script>
         </body>
         </html>
       `);
       printWindow.document.close();
+      
+      // Lanzar la impresión directamente sobre la ventana una vez el DOM esté listo
+      setTimeout(function() {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
     }
 
     // ── ACCIONES DE CAJAS (API SYNC) ──
