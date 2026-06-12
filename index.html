@@ -1131,6 +1131,13 @@
 
   <!-- SCRIPTS -->
   <script>
+    // Intentar leer la API URL desde los parámetros de la URL (?api=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const apiParam = urlParams.get('api');
+    if (apiParam) {
+      localStorage.setItem("CAMPAMENTO_API_URL", apiParam);
+    }
+
     let API_URL = localStorage.getItem("CAMPAMENTO_API_URL") || "";
     let appData = { materiales: [], repartoCajas: [] };
     let activeTab = "compra";
