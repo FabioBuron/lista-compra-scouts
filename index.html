@@ -1167,10 +1167,21 @@
     }
 
     function getCustomBoxes() {
+      const defaultBoxes = ["Caja Castores", "Caja Lobatos", "Caja Exploradores", "Caja Pioneros", "Caja Rutas", "Caja Coordinación"];
       try {
-        return JSON.parse(localStorage.getItem("CAMPAMENTO_BOXES")) || ["Caja 1 - Construcción", "Caja 2 - Papelería", "Caja 3 - Cocina"];
+        let stored = localStorage.getItem("CAMPAMENTO_BOXES");
+        if (stored) {
+          let parsed = JSON.parse(stored);
+          // Si contiene alguna de las cajas antiguas basadas en tipos de material, migrar a las de unidades
+          if (parsed.includes("Caja 1 - Construcción") || parsed.includes("Caja 2 - Papelería") || parsed.includes("Caja 3 - Cocina")) {
+            localStorage.setItem("CAMPAMENTO_BOXES", JSON.stringify(defaultBoxes));
+            return defaultBoxes;
+          }
+          return parsed;
+        }
+        return defaultBoxes;
       } catch(e) {
-        return ["Caja 1 - Construcción", "Caja 2 - Papelería", "Caja 3 - Cocina"];
+        return defaultBoxes;
       }
     }
 
@@ -1261,6 +1272,18 @@
         }
         if (!desgloseUnidades) desgloseUnidades = `<span class="badge badge-muted">${m.quien}</span>`;
         
+        const footerContent = m.tipo === "COMPRAR" ? `
+          <label class="checkbox-buy">
+            <input type="checkbox" ${m.comprado ? 'checked' : ''} onchange="togglePurchase('${escapeHtml(m.material)}', this)">
+            <span class="checkmark"></span>
+            <span>${m.comprado ? 'Ya comprado' : 'Marcar comprado'}</span>
+          </label>
+        ` : `
+          <div class="no-compra-info" style="font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 500;">Responsabilidad:</span> ${tipoBadge}
+          </div>
+        `;
+
         card.innerHTML = `
           <div class="card-header">
             <span class="material-title">${m.material}</span>
@@ -1288,19 +1311,17 @@
               </div>
             ` : ''}
             
-            <div class="literal-accordion" style="margin-top: 6px;">
-              <button class="accordion-trigger" onclick="toggleAccordion(this)">
-                Trazabilidad / Actividades <span>▼</span>
-              </button>
-              <div class="accordion-content">${m.detalle}</div>
+            <div class="trazabilidad-box" style="margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--caja-bg); overflow: hidden;">
+              <div style="background: var(--border); padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border);">
+                Trazabilidad / Actividades
+              </div>
+              <div style="padding: 8px 10px; font-size: 11.5px; line-height: 1.4; white-space: pre-line; color: var(--text-muted); max-height: 120px; overflow-y: auto;">
+                ${m.detalle}
+              </div>
             </div>
           </div>
           <div class="card-footer">
-            <label class="checkbox-buy">
-              <input type="checkbox" ${m.comprado ? 'checked' : ''} onchange="togglePurchase('${escapeHtml(m.material)}', this)">
-              <span class="checkmark"></span>
-              <span>${m.comprado ? 'Ya comprado' : 'Marcar comprado'}</span>
-            </label>
+            ${footerContent}
           </div>
         `;
         
