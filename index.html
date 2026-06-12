@@ -1157,8 +1157,11 @@
 
     function syncEmptyBoxes() {
       let boxes = getCustomBoxes();
-      // Añadir al set las cajas que ya vienen en los datos de reparto
+      // Añadir al set las cajas que ya vienen en los datos de reparto (ignorando las antiguas basadas en materiales)
       appData.repartoCajas.forEach(r => {
+        if (r.caja === "Caja 1 - Construcción" || r.caja === "Caja 2 - Papelería" || r.caja === "Caja 3 - Cocina") {
+          return;
+        }
         if (!boxes.includes(r.caja)) {
           boxes.push(r.caja);
         }
