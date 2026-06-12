@@ -1670,6 +1670,21 @@
       const unitKey = UNIT_BOX_MAP[boxName];
       const boxMaterialsMap = {};
       
+      // Determinar color de acento según la unidad de la caja
+      let accentColor = "#0f172a";
+      const boxLower = boxName.toLowerCase();
+      if (boxLower.includes("lobatos")) {
+        accentColor = "#eab308"; // Amarillo (Scout)
+      } else if (boxLower.includes("exploradores") || boxLower.includes("tropa")) {
+        accentColor = "#2563eb"; // Azul
+      } else if (boxLower.includes("pioneros")) {
+        accentColor = "#dc2626"; // Rojo
+      } else if (boxLower.includes("castores")) {
+        accentColor = "#ea580c"; // Naranja
+      } else if (boxLower.includes("rutas")) {
+        accentColor = "#16a34a"; // Verde
+      }
+
       // 1. Cargar por defecto
       if (unitKey) {
         appData.materiales.forEach(m => {
@@ -1735,7 +1750,7 @@
               box-sizing: border-box;
             }
             .border-container {
-              border: 5px solid #0f172a;
+              border: 5px solid ${accentColor};
               padding: 30px;
               flex-grow: 1;
               display: flex;
@@ -1745,7 +1760,7 @@
             }
             .header {
               text-align: center;
-              border-bottom: 4px solid #0f172a;
+              border-bottom: 4px solid ${accentColor};
               padding-bottom: 20px;
               margin-bottom: 25px;
             }
@@ -1754,7 +1769,7 @@
               font-weight: 700;
               text-transform: uppercase;
               letter-spacing: 3px;
-              color: #4f46e5;
+              color: ${accentColor};
             }
             .box-title {
               font-size: 48px;
@@ -1771,7 +1786,7 @@
               margin-top: 15px;
             }
             th {
-              border-bottom: 3px solid #0f172a;
+              border-bottom: 3px solid ${accentColor};
               padding: 12px;
               text-align: left;
               font-size: 18px;
@@ -1797,14 +1812,14 @@
             .checkbox-print {
               width: 24px;
               height: 24px;
-              border: 3px solid #0f172a;
+              border: 3px solid ${accentColor};
               border-radius: 6px;
               display: inline-block;
               vertical-align: middle;
             }
             .footer {
               text-align: center;
-              border-top: 3px solid #0f172a;
+              border-top: 3px solid ${accentColor};
               padding-top: 20px;
               font-size: 14px;
               font-weight: 600;
