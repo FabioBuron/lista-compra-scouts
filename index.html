@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logística Campamento 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --bg: #F8FAFC;
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --accent-orange: #F97316;
+      --caja-bg: #EEF2F6;
+      --radius: 16px;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -5px rgba(0, 0, 0, 0.03);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0B0F19;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #1F2937;
+      --caja-bg: #111827;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 4px 12px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(249, 115, 22, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* ── HEADER & NAVIGATION ── */
+    header {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    
+    [data-theme="dark"] header {
+      background: rgba(15, 23, 42, 0.7);
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-emoji {
+      font-size: 28px;
+      animation: pulse 3s infinite;
+    }
+
+    .brand h1 {
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      transition: var(--transition);
+    }
+
+    .btn-circle:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+    }
+
+    /* Tabs */
+    .tabs-wrapper {
+      background: var(--caja-bg);
+      padding: 4px;
+      border-radius: 30px;
+      display: flex;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 8px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      border-radius: 25px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ── MAIN CONTENT CONTAINER ── */
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* ── LOADER ── */
+    #loader {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+    }
+
+    .loading-text {
+      font-weight: 500;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    /* ── API CONFIGURATION BOARD ── */
+    .config-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 500px;
+      margin: 80px auto;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .config-card h2 {
+      font-weight: 800;
+      margin-bottom: 12px;
+      font-size: 24px;
+    }
+
+    .config-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .input-text {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .input-text:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 15px;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    /* ── STATUS & STATISTICS BOARD ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+    }
+
+    .stat-info h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-info p {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    /* ── FILTERS BAR ── */
+    .filters-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .filter-item {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 2;
+      min-width: 250px;
+    }
+
+    .search-input-wrapper input {
+      padding-left: 36px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    select.input-text {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+    }
+
+    /* ── CARDS GRID ── */
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .material-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .material-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.1);
+      border-color: rgba(79, 70, 229, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .material-title {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-primary { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
+    .badge-orange { background: rgba(249, 115, 22, 0.1); color: var(--accent-orange); }
+    .badge-green { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .badge-muted { background: var(--caja-bg); color: var(--text-muted); }
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label-muted {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .val-bold {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .quien-list {
+      background: var(--caja-bg);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 11px;
+      letter-spacing: 0.02em;
+    }
+
+    .literal-accordion {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .accordion-trigger {
+      width: 100%;
+      background: var(--caja-bg);
+      border: none;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion-content {
+      display: none;
+      padding: 10px;
+      background: var(--card-bg);
+      font-size: 11.5px;
+      line-height: 1.5;
+      max-height: 120px;
+      overflow-y: auto;
+      white-space: pre-line;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    .accordion-content.open {
+      display: block;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Checkbox Comprado */
+    .checkbox-buy {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .checkbox-buy input {
+      display: none;
+    }
+
+    .checkmark {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: var(--transition);
+      color: white;
+      font-size: 14px;
+    }
+
+    .checkbox-buy input:checked + .checkmark {
+      background: var(--success);
+      border-color: var(--success);
+    }
+
+    .checkbox-buy input:checked + .checkmark::after {
+      content: "✓";
+      font-weight: 900;
+    }
+
+    .material-card.comprado-style {
+      opacity: 0.65;
+      background: rgba(240, 253, 244, 0.4);
+    }
+    
+    [data-theme="dark"] .material-card.comprado-style {
+      background: rgba(20, 83, 45, 0.15);
+    }
+
+    /* ── MODO CAJAS UI ── */
+    .cajas-subnav {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .subnav-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--card-bg);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .subnav-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .cajas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    .caja-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .caja-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .caja-title {
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .caja-item-count {
+      font-size: 12px;
+      background: var(--caja-bg);
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .caja-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .caja-item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--caja-bg);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      gap: 12px;
+      transition: var(--transition);
+    }
+
+    .caja-item-name {
+      font-weight: 500;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-qty {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .btn-qty:hover {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .caja-item-qty {
+      font-weight: 700;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .caja-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .btn-outline {
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+    }
+
+    .btn-outline:hover {
+      background: rgba(79, 70, 229, 0.05);
+      color: var(--primary-hover);
+    }
+
+    /* Reparto por Materiales */
+    .reparto-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .reparto-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .reparto-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .reparto-progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .reparto-progress-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .reparto-distribution {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .distribution-badge {
+      background: var(--caja-bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 480px;
+      padding: 24px;
+      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .modal-close {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* ── NOTIFICATIONS (TOASTS) ── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 350px;
+    }
+
+    .toast {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      padding: 14px 20px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.toast-success { border-left-color: var(--success); }
+    .toast.toast-error { border-left-color: #EF4444; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes modalSlide {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-container {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .filters-bar {
+        flex-direction: column;
+      }
+      .filter-item, .search-input-wrapper {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <div class="brand">
+        <span class="logo-emoji">🏕️</span>
+        <h1>Kolkaltilla 2026</h1>
+      </div>
+      
+      <div class="tabs-wrapper">
+        <button class="tab-btn active" onclick="switchTab('compra')">🛒 Lista Compra</button>
+        <button class="tab-btn" onclick="switchTab('cajas')">📦 Logística Cajas</button>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn-circle" onclick="toggleTheme()" title="Cambiar tema">🌓</button>
+        <button class="btn-circle" onclick="openConfigModal()" title="Configurar API">⚙️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main>
+    <!-- Config Board (si no hay API URL) -->
+    <div id="config-board" class="config-card" style="display: none;">
+      <h2>Configura tu Google Sheets API</h2>
+      <p>Pega la URL de la Web App de Google Apps Script para sincronizar las compras y las cajas en tiempo real con tu hoja de cálculo.</p>
+      <div class="input-group">
+        <label>URL de Apps Script Web App</label>
+        <input type="text" id="api-url-input" class="input-text" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <button class="btn" onclick="saveApiUrl()">Conectar y Sincronizar</button>
+    </div>
+
+    <!-- Spinner de Carga -->
+    <div id="loader" style="display: none;">
+      <div class="spinner"></div>
+      <p class="loading-text">Cargando datos del campamento...</p>
+    </div>
+
+    <!-- ── MODO LISTA DE LA COMPRA ── -->
+    <section id="sec-compra" class="section">
+      <!-- Estadísticas -->
+      <div class="dashboard-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(79, 70, 229, 0.1); color: var(--primary);">📋</div>
+          <div class="stat-info">
+            <h3>Total Compra</h3>
+            <p id="stat-total-compra">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">✅</div>
+          <div class="stat-info">
+            <h3>Comprados</h3>
+            <p id="stat-comprados">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">⏳</div>
+          <div class="stat-info">
+            <h3>Progreso</h3>
+            <p id="stat-progreso">0%</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters-bar">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="filter-search" class="input-text" placeholder="Buscar material..." oninput="applyFilters()">
+        </div>
+        <div class="filter-item">
+          <select id="filter-cat" class="input-text" onchange="applyFilters()">
+            <option value="">Todas las Categorías</option>
+            <option value="Construccion/herramientas">🛠️ Construcción</option>
+            <option value="Papeleria/manualidades">🎨 Papelería / Manualidades</option>
+            <option value="Juegos/deporte">⚽ Juegos / Deporte</option>
+            <option value="Cocina/menaje">🍳 Cocina / Menaje</option>
+            <option value="Iluminacion/electronica">💡 Iluminación / Electrónica</option>
+            <option value="Higiene/limpieza">🧹 Higiene / Limpieza</option>
+            <option value="Textil/disfraces">👕 Textil / Disfraces</option>
+            <option value="Impresiones/documentacion">📄 Impresiones</option>
+            <option value="Equipo campamento">⛺ Equipo Campamento</option>
+            <option value="Otros">📦 Otros</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <select id="filter-unit" class="input-text" onchange="applyFilters()">
+            <option value="">Todas las Unidades</option>
+            <option value="CASTORES">Castores</option>
+            <option value="LOBATOS">Lobatos</option>
+            <option value="EXPLORADORES">Exploradores</option>
+            <option value="PIONEROS">Pioneros</option>
+            <option value="RUTAS PANDORA">Rutas Pandora</option>
+            <option value="RUTAS ICARO">Rutas Ícaro</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <select id="filter-status" class="input-text" onchange="applyFilters()">
+            <option value="">Todos los Estados</option>
+            <option value="pendiente" selected>⏳ Pendientes de Compra</option>
+            <option value="comprado">✅ Comprados</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Grid de Tarjetas -->
+      <div class="materials-grid" id="materials-container"></div>
+    </section>
+
+    <!-- ── MODO LOGÍSTICA CAJAS ── -->
+    <section id="sec-cajas" class="section">
+      <!-- Subnavegación de Cajas -->
+      <div class="cajas-subnav">
+        <button id="btn-subnav-cajas" class="subnav-btn active" onclick="switchCajasSubMode('cajas')">📦 Ver por Cajas</button>
+        <button id="btn-subnav-materiales" class="subnav-btn" onclick="switchCajasSubMode('materiales')">📝 Ver por Materiales</button>
+        <button class="subnav-btn btn-outline" style="margin-left: auto;" onclick="openNewBoxModal()">➕ Crear Nueva Caja</button>
+      </div>
+
+      <!-- Vista 1: Agrupado por Cajas -->
+      <div id="sub-cajas" class="cajas-grid"></div>
+
+      <!-- Vista 2: Reparto por Materiales -->
+      <div id="sub-materiales" class="reparto-list" style="display: none;"></div>
+    </section>
+  </main>
+
+  <!-- MODAL: Configuración API -->
+  <div class="modal-overlay" id="modal-config">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Configurar URL de Google Sheets</h3>
+        <button class="modal-close" onclick="closeModal('modal-config')">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 13px;">Introduce la URL que te proporciona Google Sheets tras publicar tu Apps Script como Web App.</p>
+        <div class="input-group">
+          <label>URL de Apps Script</label>
+          <input type="text" id="modal-api-url" class="input-text">
+        </div>
+      </div>
+      <button class="btn" onclick="saveModalConfig()">Guardar y Recargar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Crear Nueva Caja -->
+  <div class="modal-overlay" id="modal-new-box">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Crear Nueva Caja</h3>
+        <button class="modal-close" onclick="closeModal('modal-new-box')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label>Nombre de la Caja</label>
+          <input type="text" id="new-box-name" class="input-text" placeholder="Ej: Caja 1 - Herramientas">
+        </div>
+      </div>
+      <button class="btn" onclick="createNewBox()">Crear Caja</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Añadir Material a Caja -->
+  <div class="modal-overlay" id="modal-add-to-box">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Añadir a <span id="add-modal-box-name">Caja</span></h3>
+        <button class="modal-close" onclick="closeModal('modal-add-to-box')">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group">
+          <label>Buscar Material</label>
+          <input type="text" id="search-box-material" class="input-text" placeholder="Escribe para buscar..." oninput="filterAddMaterialList()">
+        </div>
+        <div class="input-group">
+          <label>Seleccionar Material</label>
+          <select id="select-box-material" class="input-text" style="height: 120px;" size="5"></select>
+        </div>
+        <div class="input-group">
+          <label>Cantidad a Meter</label>
+          <input type="number" id="box-material-qty" class="input-text" value="1" min="1">
+        </div>
+      </div>
+      <button class="btn" onclick="addMaterialToBox()">Agregar a la Caja</button>
+    </div>
+  </div>
+
+  <!-- Contenedor de Toasts -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script>
+    let API_URL = localStorage.getItem("CAMPAMENTO_API_URL") || "";
+    let appData = { materiales: [], repartoCajas: [] };
+    let activeTab = "compra";
+    let cajasSubMode = "cajas";
+
+    // Inicializar App
+    window.addEventListener('DOMContentLoaded', () => {
+      // Cargar Tema
+      const savedTheme = localStorage.getItem("theme") || "light";
+      document.body.setAttribute('data-theme', savedTheme);
+      
+      if (!API_URL) {
+        document.getElementById("config-board").style.display = "block";
+      } else {
+        fetchData();
+      }
+    });
+
+    // ── CONFIGURACIÓN DE API ──
+    function saveApiUrl() {
+      const url = document.getElementById("api-url-input").value.trim();
+      if (!url) {
+        showToast("Error: La URL no puede estar vacía", "error");
+        return;
+      }
+      localStorage.setItem("CAMPAMENTO_API_URL", url);
+      API_URL = url;
+      document.getElementById("config-board").style.display = "none";
+      fetchData();
+    }
+
+    function openConfigModal() {
+      document.getElementById("modal-api-url").value = API_URL;
+      openModal("modal-config");
+    }
+
+    function saveModalConfig() {
+      const url = document.getElementById("modal-api-url").value.trim();
+      if (url) {
+        localStorage.setItem("CAMPAMENTO_API_URL", url);
+        API_URL = url;
+        closeModal("modal-config");
+        fetchData();
+      }
+    }
+
+    // ── CARGA DE DATOS DESDE GOOGLE SHEETS ──
+    function fetchData() {
+      if (!API_URL) return;
+      showLoader(true);
+      
+      // Llamada AJAX
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            showToast("Error de API: " + data.error, "error");
+            document.getElementById("config-board").style.display = "block";
+          } else {
+            appData = data;
+            // Registrar cajas personalizadas en LocalStorage para no perder cajas vacías creadas
+            syncEmptyBoxes();
+            renderDashboard();
+            renderMaterials();
+            renderCajasMode();
+            showToast("Datos sincronizados en tiempo real", "success");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showToast("Error al conectar con Google Sheets. Revisa la URL de tu Web App.", "error");
+          document.getElementById("config-board").style.display = "block";
+        })
+        .finally(() => {
+          showLoader(false);
+        });
+    }
+
+    function syncEmptyBoxes() {
+      let boxes = getCustomBoxes();
+      // Añadir al set las cajas que ya vienen en los datos de reparto
+      appData.repartoCajas.forEach(r => {
+        if (!boxes.includes(r.caja)) {
+          boxes.push(r.caja);
+        }
+      });
+      localStorage.setItem("CAMPAMENTO_BOXES", JSON.stringify(boxes));
+    }
+
+    function getCustomBoxes() {
+      try {
+        return JSON.parse(localStorage.getItem("CAMPAMENTO_BOXES")) || ["Caja 1 - Construcción", "Caja 2 - Papelería", "Caja 3 - Cocina"];
+      } catch(e) {
+        return ["Caja 1 - Construcción", "Caja 2 - Papelería", "Caja 3 - Cocina"];
+      }
+    }
+
+    // ── VISTAS Y FILTROS ──
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
+      
+      document.querySelectorAll(".section").forEach(sec => sec.classList.remove("active"));
+      document.getElementById(`sec-${tab}`).classList.add("active");
+      
+      if (tab === "cajas") {
+        renderCajasMode();
+      }
+    }
+
+    function switchCajasSubMode(mode) {
+      cajasSubMode = mode;
+      document.getElementById("btn-subnav-cajas").classList.toggle("active", mode === "cajas");
+      document.getElementById("btn-subnav-materiales").classList.toggle("active", mode === "materiales");
+      
+      document.getElementById("sub-cajas").style.display = mode === "cajas" ? "grid" : "none";
+      document.getElementById("sub-materiales").style.display = mode === "materiales" ? "flex" : "none";
+      
+      renderCajasMode();
+    }
+
+    // Dashboard estadístico
+    function renderDashboard() {
+      // Filtrar materiales de tipo COMPRAR
+      const comprarList = appData.materiales.filter(m => m.tipo === "COMPRAR");
+      const total = comprarList.length;
+      const comprados = comprarList.filter(m => m.comprado).length;
+      const pct = total > 0 ? Math.round((comprados / total) * 100) : 0;
+      
+      document.getElementById("stat-total-compra").textContent = total;
+      document.getElementById("stat-comprados").textContent = comprados;
+      document.getElementById("stat-progreso").textContent = `${pct}%`;
+    }
+
+    // Renderizar Lista de Compra
+    function renderMaterials() {
+      const container = document.getElementById("materials-container");
+      container.innerHTML = "";
+      
+      const searchVal = document.getElementById("filter-search").value.toLowerCase();
+      const catVal = document.getElementById("filter-cat").value;
+      const unitVal = document.getElementById("filter-unit").value;
+      const statusVal = document.getElementById("filter-status").value;
+      
+      // Filtrar y renderizar
+      appData.materiales.forEach(m => {
+        // Filtro búsqueda
+        if (searchVal && !m.material.toLowerCase().includes(searchVal)) return;
+        // Filtro categoría
+        if (catVal && m.categoria !== catVal) return;
+        // Filtro unidad
+        if (unitVal && !m.quien.includes(unitVal)) return;
+        // Filtro estado
+        if (statusVal === "pendiente" && m.comprado) return;
+        if (statusVal === "comprado" && !m.comprado) return;
+        
+        // Crear Tarjeta
+        const card = document.createElement("div");
+        card.className = `material-card ${m.comprado ? 'comprado-style' : ''}`;
+        
+        // Cargar Categoría
+        const catBadge = getCategoryBadge(m.categoria);
+        const tipoBadge = getTipoBadge(m.tipo);
+        
+        // Desglose visual por unidades
+        let desgloseUnidades = "";
+        if (parseFloat(m.castores) > 0 || (m.castores && m.castores.toString().startsWith("="))) {
+          desgloseUnidades += `<span class="badge badge-primary" style="margin-bottom:2px;">Castores: ${m.castores}</span> `;
+        }
+        if (parseFloat(m.lobatos) > 0 || (m.lobatos && m.lobatos.toString().startsWith("="))) {
+          desgloseUnidades += `<span class="badge badge-warning" style="margin-bottom:2px;">Lobatos: ${m.lobatos}</span> `;
+        }
+        if (parseFloat(m.exploradores) > 0 || (m.exploradores && m.exploradores.toString().startsWith("="))) {
+          desgloseUnidades += `<span class="badge badge-green" style="margin-bottom:2px;">Tropa: ${m.exploradores}</span> `;
+        }
+        if (parseFloat(m.pioneros) > 0 || (m.pioneros && m.pioneros.toString().startsWith("="))) {
+          desgloseUnidades += `<span class="badge badge-muted" style="margin-bottom:2px; background:rgba(91,49,91,0.1); color:#5B315B;">Pioneros: ${m.pioneros}</span> `;
+        }
+        if (parseFloat(m.rutas) > 0 || (m.rutas && m.rutas.toString().startsWith("="))) {
+          desgloseUnidades += `<span class="badge badge-orange" style="margin-bottom:2px;">Rutas: ${m.rutas}</span> `;
+        }
+        if (!desgloseUnidades) desgloseUnidades = `<span class="badge badge-muted">${m.quien}</span>`;
+        
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="material-title">${m.material}</span>
+            ${catBadge}
+          </div>
+          <div class="card-body">
+            <div class="card-row">
+              <span class="label-muted">Tipo:</span>
+              <span>${tipoBadge}</span>
+            </div>
+            <div class="card-row">
+              <span class="label-muted">Cantidad Total:</span>
+              <span class="val-bold" style="color: var(--primary); font-size: 15px;">${m.cantidadRecomendada || "0"}</span>
+            </div>
+            <div class="card-row" style="flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+              <span class="label-muted" style="width: 100%; margin-bottom: 2px;">Requerido por Unidades:</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 4px; width: 100%;">
+                ${desgloseUnidades}
+              </div>
+            </div>
+            ${m.resumenCaja ? `
+              <div class="card-row" style="margin-top: 6px;">
+                <span class="label-muted">📦 Repartido en Cajas:</span>
+                <span class="val-bold" style="color: var(--success); font-size:12px;">${m.resumenCaja}</span>
+              </div>
+            ` : ''}
+            
+            <div class="literal-accordion" style="margin-top: 6px;">
+              <button class="accordion-trigger" onclick="toggleAccordion(this)">
+                Trazabilidad / Actividades <span>▼</span>
+              </button>
+              <div class="accordion-content">${m.detalle}</div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <label class="checkbox-buy">
+              <input type="checkbox" ${m.comprado ? 'checked' : ''} onchange="togglePurchase('${escapeHtml(m.material)}', this)">
+              <span class="checkmark"></span>
+              <span>${m.comprado ? 'Ya comprado' : 'Marcar comprado'}</span>
+            </label>
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+      
+      if (container.children.length === 0) {
+        container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">Ningún material coincide con los filtros aplicados.</p>`;
+      }
+    }
+
+    function applyFilters() {
+      renderMaterials();
+    }
+
+    // ── SINCRONIZACIÓN DE CAMBIO COMPRADO ──
+    function togglePurchase(materialName, checkbox) {
+      const isChecked = checkbox.checked;
+      const card = checkbox.closest(".material-card");
+      
+      // Actualización local rápida
+      card.classList.toggle("comprado-style", isChecked);
+      const labelText = checkbox.nextElementSibling.nextElementSibling;
+      labelText.textContent = isChecked ? 'Ya comprado' : 'Marcar comprado';
+      
+      // Encontrar en appData y actualizar
+      const mat = appData.materiales.find(m => m.material === materialName);
+      if (mat) mat.comprado = isChecked;
+      renderDashboard();
+      
+      // Enviar a la API de Google Sheets
+      const url = `${API_URL}?action=update_purchase&material=${encodeURIComponent(materialName)}&status=${isChecked}`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            showToast(`"${materialName}" actualizado`, "success");
+            if (isChecked) triggerConfetti();
+          } else {
+            throw new Error("No se pudo guardar");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showToast("Error de conexión. Revirtiendo cambio.", "error");
+          // Revertir
+          checkbox.checked = !isChecked;
+          card.classList.toggle("comprado-style", !isChecked);
+          labelText.textContent = !isChecked ? 'Ya comprado' : 'Marcar comprado';
+          if (mat) mat.comprado = !isChecked;
+          renderDashboard();
+        });
+    }
+
+    // ── MODO CAJAS LOGÍSTICA ──
+    function renderCajasMode() {
+      const boxes = getCustomBoxes();
+      
+      if (cajasSubMode === "cajas") {
+        const container = document.getElementById("sub-cajas");
+        container.innerHTML = "";
+        
+        boxes.forEach(box => {
+          // Filtrar items en esta caja
+          const itemsInBox = appData.repartoCajas.filter(r => r.caja === box);
+          
+          const card = document.createElement("div");
+          card.className = "caja-card";
+          
+          let itemsHtml = "";
+          itemsInBox.forEach(item => {
+            itemsHtml += `
+              <div class="caja-item-row">
+                <span class="caja-item-name" title="${item.material}">${item.material}</span>
+                <div class="qty-controls">
+                  <button class="btn-qty" onclick="changeBoxQty('${escapeHtml(item.material)}', '${escapeHtml(box)}', -1)">-</button>
+                  <span class="caja-item-qty">${item.cantidad}</span>
+                  <button class="btn-qty" onclick="changeBoxQty('${escapeHtml(item.material)}', '${escapeHtml(box)}', 1)">+</button>
+                </div>
+              </div>
+            `;
+          });
+          
+          card.innerHTML = `
+            <div class="caja-header">
+              <span class="caja-title">📦 ${box}</span>
+              <span class="caja-item-count">${itemsInBox.length} art.</span>
+            </div>
+            <div class="caja-items-list">
+              ${itemsInBox.length > 0 ? itemsHtml : '<p style="color: var(--text-muted); font-size:12px; text-align:center; padding: 20px;">Caja vacía. Agrega materiales.</p>'}
+            </div>
+            <div class="caja-actions">
+              <button class="btn" style="flex: 1;" onclick="openAddToBoxModal('${escapeHtml(box)}')">Agregar Material</button>
+              <button class="btn btn-outline" style="width: 42px; padding: 0;" onclick="deleteCustomBox('${escapeHtml(box)}')" title="Borrar Caja">🗑️</button>
+            </div>
+          `;
+          
+          container.appendChild(card);
+        });
+      } else {
+        // Ver por Materiales
+        const container = document.getElementById("sub-materiales");
+        container.innerHTML = "";
+        
+        appData.materiales.forEach(m => {
+          // Obtener reparto de este material
+          const allocations = appData.repartoCajas.filter(r => r.material === m.material);
+          const totalPacked = allocations.reduce((acc, curr) => acc + parseInt(curr.cantidad), 0);
+          
+          // Evaluar cantidad recomendada estimada
+          let recQty = parseInt(m.cantidadRecomendada);
+          if (isNaN(recQty)) recQty = 0; // Fórmulas de Excel devolverán string o número dependiendo del estado
+          
+          const progressPct = recQty > 0 ? Math.min(Math.round((totalPacked / recQty) * 100), 100) : (totalPacked > 0 ? 100 : 0);
+          
+          const card = document.createElement("div");
+          card.className = "reparto-card";
+          
+          let distHtml = "";
+          allocations.forEach(a => {
+            distHtml += `
+              <div class="distribution-badge">
+                📦 ${a.caja}: <strong>${a.cantidad}</strong>
+                <span style="cursor:pointer;color:red;margin-left:4px;" onclick="changeBoxQty('${escapeHtml(m.material)}', '${escapeHtml(a.caja)}', -${a.cantidad})">×</span>
+              </div>
+            `;
+          });
+          
+          card.innerHTML = `
+            <div class="reparto-header">
+              <span class="val-bold" style="flex:1;">${m.material}</span>
+              <span class="label-muted" style="font-size:12px;">Meta: ${m.cantidadRecomendada || "S/E"} (Repartido: <strong>${totalPacked}</strong>)</span>
+            </div>
+            ${recQty > 0 ? `
+              <div class="reparto-progress-bar">
+                <div class="reparto-progress-fill" style="width: ${progressPct}%;"></div>
+              </div>
+            ` : ''}
+            <div class="reparto-distribution">
+              ${allocations.length > 0 ? distHtml : '<span style="color: var(--text-muted); italic; font-size:12px;">Sin meter en ninguna caja aún.</span>'}
+            </div>
+          `;
+          
+          container.appendChild(card);
+        });
+      }
+    }
+
+    // ── ACCIONES DE CAJAS (API SYNC) ──
+    function changeBoxQty(materialName, boxName, diff) {
+      // Buscar reparto actual
+      const allocation = appData.repartoCajas.find(r => r.material === materialName && r.caja === boxName);
+      let newQty = diff;
+      if (allocation) {
+        newQty = parseInt(allocation.cantidad) + diff;
+      }
+      
+      if (newQty < 0) newQty = 0;
+      
+      // Actualizar UI en local de inmediato
+      if (newQty === 0) {
+        appData.repartoCajas = appData.repartoCajas.filter(r => !(r.material === materialName && r.caja === boxName));
+      } else {
+        if (allocation) {
+          allocation.cantidad = newQty;
+        } else {
+          appData.repartoCajas.push({ material: materialName, caja: boxName, cantidad: newQty });
+        }
+      }
+      renderCajasMode();
+      
+      // Enviar a la API
+      const url = `${API_URL}?action=update_box&material=${encodeURIComponent(materialName)}&box=${encodeURIComponent(boxName)}&quantity=${newQty}`;
+      
+      fetch(url)
+        .then(res => res.json())
+        .then(res => {
+          if (res.success) {
+            showToast(`Caja actualizada: ${materialName} (${newQty})`, "success");
+            // Recargar datos en background para asegurar el resumenCaja actualizado de la hoja principal
+            fetchDataBackground();
+          } else {
+            throw new Error();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showToast("Error al guardar en el servidor. Recargando...", "error");
+          fetchData(); // Recargar todo para revertir consistentemente
+        });
+    }
+
+    // Recargar datos en background sin activar el spinner para no molestar la navegación
+    function fetchDataBackground() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            appData = data;
+          }
+        });
+    }
+
+    // Gestión de Cajas Locales
+    function openNewBoxModal() {
+      openModal("modal-new-box");
+      document.getElementById("new-box-name").value = "";
+    }
+
+    function createNewBox() {
+      const name = document.getElementById("new-box-name").value.trim();
+      if (!name) return;
+      
+      let boxes = getCustomBoxes();
+      if (boxes.includes(name)) {
+        showToast("Esa caja ya existe", "error");
+        return;
+      }
+      
+      boxes.push(name);
+      localStorage.setItem("CAMPAMENTO_BOXES", JSON.stringify(boxes));
+      closeModal("modal-new-box");
+      renderCajasMode();
+      showToast(`Caja "${name}" creada`, "success");
+    }
+
+    function deleteCustomBox(boxName) {
+      if (!confirm(`¿Seguro que quieres borrar la caja "${boxName}"? Todo su contenido volverá a estar sin caja.`)) return;
+      
+      // Eliminar de las cajas en LocalStorage
+      let boxes = getCustomBoxes().filter(b => b !== boxName);
+      localStorage.setItem("CAMPAMENTO_BOXES", JSON.stringify(boxes));
+      
+      // Borrar todas las asignaciones a esta caja en Google Sheets
+      const itemsInBox = appData.repartoCajas.filter(r => r.caja === boxName);
+      
+      // Actualizar local
+      appData.repartoCajas = appData.repartoCajas.filter(r => r.caja !== boxName);
+      renderCajasMode();
+      
+      // Enviar des-asignaciones secuenciales a la API
+      if (itemsInBox.length > 0) {
+        showToast("Vaciando caja en el servidor...", "warning");
+        let promises = itemsInBox.map(item => {
+          return fetch(`${API_URL}?action=update_box&material=${encodeURIComponent(item.material)}&box=${encodeURIComponent(boxName)}&quantity=0`);
+        });
+        
+        Promise.all(promises)
+          .then(() => {
+            showToast(`Caja "${boxName}" borrada de forma segura`, "success");
+            fetchDataBackground();
+          })
+          .catch(() => {
+            showToast("Error al borrar elementos del Sheets", "error");
+          });
+      } else {
+        showToast(`Caja "${boxName}" eliminada`, "success");
+      }
+    }
+
+    // Modal Añadir Material a Caja
+    let activeBoxForAdd = "";
+    function openAddToBoxModal(boxName) {
+      activeBoxForAdd = boxName;
+      document.getElementById("add-modal-box-name").textContent = boxName;
+      document.getElementById("search-box-material").value = "";
+      document.getElementById("box-material-qty").value = "1";
+      
+      filterAddMaterialList();
+      openModal("modal-add-to-box");
+    }
+
+    function filterAddMaterialList() {
+      const search = document.getElementById("search-box-material").value.toLowerCase();
+      const select = document.getElementById("select-box-material");
+      select.innerHTML = "";
+      
+      // Mostrar solo materiales que no estén ya en esta caja
+      appData.materiales.forEach(m => {
+        if (search && !m.material.toLowerCase().includes(search)) return;
+        
+        const opt = document.createElement("option");
+        opt.value = m.material;
+        opt.textContent = m.material;
+        select.appendChild(opt);
+      });
+      
+      if (select.children.length > 0) {
+        select.children[0].selected = true;
+      }
+    }
+
+    function addMaterialToBox() {
+      const select = document.getElementById("select-box-material");
+      if (!select.value) {
+        showToast("Debes seleccionar un material", "error");
+        return;
+      }
+      
+      const material = select.value;
+      const qty = parseInt(document.getElementById("box-material-qty").value);
+      
+      if (qty <= 0) return;
+      
+      closeModal("modal-add-to-box");
+      changeBoxQty(material, activeBoxForAdd, qty);
+    }
+
+    // ── MODALES ACCIONES ──
+    function openModal(id) {
+      document.getElementById(id).classList.add("active");
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    // ── UTILIDADES ──
+    function toggleTheme() {
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem("theme", next);
+    }
+
+    function toggleAccordion(btn) {
+      const content = btn.nextElementSibling;
+      const isOpen = content.classList.toggle("open");
+      btn.querySelector("span").textContent = isOpen ? "▲" : "▼";
+    }
+
+    function showLoader(show) {
+      document.getElementById("loader").style.display = show ? "flex" : "none";
+    }
+
+    function showToast(msg, type = "success") {
+      const container = document.getElementById("toast-container");
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${msg}</span>
+        <span style="cursor:pointer; opacity:0.7;" onclick="this.parentElement.remove()">×</span>
+      `;
+      
+      container.appendChild(toast);
+      
+      // Auto borrar tras 3.5s
+      setTimeout(() => {
+        toast.style.animation = "fadeIn 0.3s reverse ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function getCategoryBadge(cat) {
+      switch(cat) {
+        case "Construccion/herramientas": return `<span class="badge badge-primary">🛠️ Construcción</span>`;
+        case "Papeleria/manualidades": return `<span class="badge badge-orange">🎨 Papelería</span>`;
+        case "Juegos/deporte": return `<span class="badge badge-green">⚽ Juegos</span>`;
+        case "Cocina/menaje": return `<span class="badge badge-warning">🍳 Cocina</span>`;
+        default: return `<span class="badge badge-muted">${cat.replace('/', ' ')}</span>`;
+      }
+    }
+
+    function getTipoBadge(tipo) {
+      switch(tipo) {
+        case "COMPRAR": return `<span style="color:#EF4444; font-weight:700;">🛒 COMPRAR</span>`;
+        case "LO TRAE EL NINO": return `<span style="color:#64748B; font-weight:600;">🎒 TRAE NIÑO</span>`;
+        case "YA HAY (bases) - revisar": return `<span style="color:#10B981; font-weight:600;">🏠 YA HAY BASES</span>`;
+        default: return `<span style="color:var(--primary); font-weight:600;">${tipo}</span>`;
+      }
+    }
+
+    function triggerConfetti() {
+      // Confetti ultra-ligero usando divs flotantes de colores
+      for (let i = 0; i < 25; i++) {
+        const conf = document.createElement("div");
+        conf.style.position = "fixed";
+        conf.style.width = "8px";
+        conf.style.height = "8px";
+        conf.style.backgroundColor = ["#4F46E5", "#F97316", "#10B981", "#F59E0B", "#EF4444"][Math.floor(Math.random()*5)];
+        conf.style.left = `${Math.random() * 100}vw`;
+        conf.style.top = "100vh";
+        conf.style.borderRadius = "50%";
+        conf.style.zIndex = "999";
+        conf.style.transition = "transform 1.5s ease-out, opacity 1.5s ease-out";
+        document.body.appendChild(conf);
+        
+        setTimeout(() => {
+          conf.style.transform = `translateY(-${Math.random() * 80 + 20}vh) translateX(${(Math.random() - 0.5) * 200}px) rotate(${Math.random() * 360}deg)`;
+          conf.style.opacity = "0";
+          setTimeout(() => conf.remove(), 1500);
+        }, 50);
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function escapeHtmlString(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
