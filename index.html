@@ -997,6 +997,13 @@
       white-space: nowrap;
     }
 
+    .modal-body .trazabilidad-table {
+      font-size: 12.5px;
+    }
+    .modal-body .trazabilidad-table th, .modal-body .trazabilidad-table td {
+      padding: 10px 12px;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       header {
@@ -1252,6 +1259,22 @@
         </div>
       </div>
       <button class="btn" onclick="saveModalConfig()">Guardar y Recargar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalle de Trazabilidad / Actividades -->
+  <div class="modal-overlay" id="modal-trazabilidad-detail">
+    <div class="modal" style="max-width: 700px; width: 95%;">
+      <div class="modal-header">
+        <h3>Detalle de Actividades: <span id="trazabilidad-modal-material-name" style="color: var(--primary);">Material</span></h3>
+        <button class="modal-close" onclick="closeModal('modal-trazabilidad-detail')">×</button>
+      </div>
+      <div class="modal-body" style="max-height: 65vh; overflow-y: auto;">
+        <div id="trazabilidad-modal-content">
+          <!-- Aquí se inyectará la tabla de trazabilidad detallada -->
+        </div>
+      </div>
+      <button class="btn" style="background: var(--text-muted); margin-top: 10px;" onclick="closeModal('modal-trazabilidad-detail')">Cerrar</button>
     </div>
   </div>
 
@@ -1651,8 +1674,9 @@
             ` : ''}
             
             <div class="trazabilidad-box" style="margin-top: 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--caja-bg); overflow: hidden;">
-              <div style="background: var(--border); padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border);">
-                Trazabilidad / Actividades
+              <div style="background: var(--border); padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <span>Trazabilidad / Actividades</span>
+                <span class="zoom-trazabilidad-btn" style="cursor: pointer; color: var(--primary); font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 2px;" onclick="showTrazabilidadModal('${escapeHtml(m.material)}')" title="Ampliar detalles en pantalla completa">🔍 Ampliar</span>
               </div>
               <div style="max-height: 150px; overflow-y: auto; overflow-x: auto;">
                 ${formatDetalleAsTable(m.detalle)}
@@ -2483,6 +2507,22 @@
         toast.style.animation = "fadeIn 0.3s reverse ease";
         setTimeout(() => toast.remove(), 300);
       }, 3500);
+    }
+
+    function showTrazabilidadModal(materialName) {
+      const mat = appData.materiales.find(m => m.material === materialName);
+      if (!mat) {
+        showToast("Material no encontrado", "error");
+        return;
+      }
+      
+      document.getElementById("trazabilidad-modal-material-name").textContent = mat.material;
+      
+      // Formatear el detalle como una tabla pero más espaciosa
+      const tableHtml = formatDetalleAsTable(mat.detalle);
+      document.getElementById("trazabilidad-modal-content").innerHTML = tableHtml;
+      
+      openModal("modal-trazabilidad-detail");
     }
 
     function getUnitBadgeClass(unitName) {
