@@ -964,6 +964,39 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* Trazabilidad en tabla */
+    .trazabilidad-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      text-align: left;
+    }
+    .trazabilidad-table th, .trazabilidad-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .trazabilidad-table th {
+      background: var(--bg);
+      font-weight: 600;
+      color: var(--text-muted);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    .trazabilidad-table tr:last-child td {
+      border-bottom: none;
+    }
+    .trazabilidad-table .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       header {
@@ -1538,7 +1571,15 @@
         // Filtro categoría
         if (catVal && m.categoria !== catVal) return;
         // Filtro unidad
-        if (unitVal && !m.quien.includes(unitVal)) return;
+        if (unitVal) {
+          const mQuienLower = (m.quien || "").toLowerCase();
+          const unitValLower = unitVal.toLowerCase();
+          if (unitValLower.startsWith("rutas")) {
+            if (!mQuienLower.includes("rutas")) return;
+          } else {
+            if (!mQuienLower.includes(unitValLower)) return;
+          }
+        }
         // Filtro estado
         if (statusVal === "pendiente" && m.comprado) return;
         if (statusVal === "comprado" && !m.comprado) return;
@@ -1613,8 +1654,8 @@
               <div style="background: var(--border); padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border);">
                 Trazabilidad / Actividades
               </div>
-              <div style="padding: 8px 10px; font-size: 11.5px; line-height: 1.4; white-space: pre-line; color: var(--text-muted); max-height: 120px; overflow-y: auto;">
-                ${m.detalle}
+              <div style="max-height: 150px; overflow-y: auto; overflow-x: auto;">
+                ${formatDetalleAsTable(m.detalle)}
               </div>
             </div>
           </div>
@@ -2442,6 +2483,72 @@
         toast.style.animation = "fadeIn 0.3s reverse ease";
         setTimeout(() => toast.remove(), 300);
       }, 3500);
+    }
+
+    function getUnitBadgeClass(unitName) {
+      const name = (unitName || "").toLowerCase().trim();
+      if (name.includes("castores")) return "badge-castores";
+      if (name.includes("lobatos")) return "badge-lobatos";
+      if (name.includes("tropa") || name.includes("exploradores")) return "badge-tropa";
+      if (name.includes("pioneros")) return "badge-pioneros";
+      if (name.includes("rutas")) return "badge-rutas";
+      return "badge-muted";
+    }
+
+    function formatDetalleAsTable(detalleText) {
+      if (!detalleText) {
+        return `<div style="padding: 8px 10px; font-size: 11.5px; color: var(--text-muted);">Sin detalles de trazabilidad.</div>`;
+      }
+      
+      const lines = detalleText.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) {
+        return `<div style="padding: 8px 10px; font-size: 11.5px; color: var(--text-muted);">Sin detalles de trazabilidad.</div>`;
+      }
+      
+      let rowsHtml = "";
+      
+      lines.forEach(line => {
+        const match = line.match(/^([^-\n]+)\s*-\s*([^:«\n]+)(?::\s*«?([^»\n]*)»?)?/);
+        
+        let unidad = "";
+        let actividad = "";
+        let texto = "";
+        
+        if (match) {
+          unidad = match[1].trim();
+          actividad = match[2].trim();
+          texto = match[3] ? match[3].trim() : "";
+        } else {
+          unidad = "General";
+          actividad = "-";
+          texto = line;
+        }
+        
+        const badgeClass = getUnitBadgeClass(unidad);
+        
+        rowsHtml += `
+          <tr>
+            <td style="white-space: nowrap; width: 1%;"><span class="badge ${badgeClass}">${unidad}</span></td>
+            <td>${actividad}</td>
+            <td class="val-bold" style="color: var(--text); font-weight: 500;">${texto || "-"}</td>
+          </tr>
+        `;
+      });
+      
+      return `
+        <table class="trazabilidad-table">
+          <thead>
+            <tr>
+              <th>Unidad</th>
+              <th>Actividad</th>
+              <th>Detalle Solicitado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      `;
     }
 
     function getCategoryBadge(cat) {
