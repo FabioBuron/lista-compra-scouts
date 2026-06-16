@@ -1011,6 +1011,8 @@
         top: 0;
         padding: 4px 12px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
       .header-container {
         flex-direction: row;
@@ -1020,10 +1022,10 @@
         gap: 8px;
       }
       .brand h1 {
-        font-size: 18px;
+        font-size: 16px;
       }
       .logo-emoji {
-        font-size: 22px;
+        font-size: 20px;
       }
       .tabs-wrapper {
         position: fixed;
@@ -1069,6 +1071,42 @@
       .config-card {
         margin: 30px auto;
         padding: 20px;
+      }
+      .material-card {
+        padding: 12px;
+        border-radius: 12px;
+      }
+      .cajas-subnav {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+      }
+      .cajas-subnav .subnav-btn {
+        margin-left: 0 !important;
+        text-align: center;
+        width: 100%;
+      }
+      .censo-panel {
+        position: fixed;
+        top: 65px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+        z-index: 1010;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        background: var(--bg) !important;
+        border: 1.5px solid var(--border);
+      }
+      .censo-panel .input-text-mini {
+        border-color: var(--text-muted);
+        width: 80px;
+      }
+      .modal {
+        padding: 16px;
+        border-radius: 16px;
+      }
+      .modal-body {
+        padding: 8px 0;
       }
     }
   </style>
@@ -2548,22 +2586,48 @@
       let rowsHtml = "";
       
       lines.forEach(line => {
-        const match = line.match(/^([^-\n]+)\s*-\s*([^:«\n]+)(?::\s*«?([^»\n]*)»?)?/);
-        
         let unidad = "";
         let actividad = "";
         let texto = "";
         
-        if (match) {
-          unidad = match[1].trim();
-          actividad = match[2].trim();
-          texto = match[3] ? match[3].trim() : "";
+        const openQuoteIdx = line.indexOf("«");
+        const closeQuoteIdx = line.lastIndexOf("»");
+        
+        if (openQuoteIdx !== -1 && closeQuoteIdx !== -1 && closeQuoteIdx > openQuoteIdx) {
+          texto = line.substring(openQuoteIdx + 1, closeQuoteIdx).trim();
+          const resto = line.substring(0, openQuoteIdx).trim();
+          
+          const restoClean = resto.replace(/:+$/, "").trim();
+          
+          const firstDashIdx = restoClean.indexOf("-");
+          if (firstDashIdx !== -1) {
+            unidad = restoClean.substring(0, firstDashIdx).trim();
+            actividad = restoClean.substring(firstDashIdx + 1).trim();
+          } else {
+            unidad = restoClean;
+            actividad = "-";
+          }
         } else {
-          unidad = "General";
-          actividad = "-";
-          texto = line;
+          const firstDashIdx = line.indexOf("-");
+          if (firstDashIdx !== -1) {
+            unidad = line.substring(0, firstDashIdx).trim();
+            const resto = line.substring(firstDashIdx + 1).trim();
+            const lastColonIdx = resto.lastIndexOf(":");
+            if (lastColonIdx !== -1) {
+              actividad = resto.substring(0, lastColonIdx).trim();
+              texto = resto.substring(lastColonIdx + 1).trim();
+            } else {
+              actividad = resto;
+              texto = "-";
+            }
+          } else {
+            unidad = "General";
+            actividad = "-";
+            texto = line;
+          }
         }
         
+        actividad = actividad.replace(/:+$/, "").trim();
         const badgeClass = getUnitBadgeClass(unidad);
         
         rowsHtml += `
