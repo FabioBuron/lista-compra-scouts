@@ -1109,7 +1109,64 @@
         padding: 8px 0;
       }
     }
+
+    /* Ficha de actividad del Word */
+    .actividad-table-word {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .actividad-table-word tr {
+      border-bottom: 1px solid var(--border);
+    }
+    .actividad-table-word tr:last-child {
+      border-bottom: none;
+    }
+    .actividad-table-word td {
+      padding: 8px 10px;
+      vertical-align: top;
+      line-height: 1.4;
+      border-right: 1px solid var(--border);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .actividad-table-word td:last-child {
+      border-right: none;
+    }
+    .actividad-table-word td.word-label {
+      font-weight: 700;
+      background: var(--caja-bg);
+      width: 25%;
+      color: var(--text-muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .actividad-table-word td.word-value {
+      font-weight: 400;
+      white-space: pre-line;
+    }
+    .actividad-table-word td.word-label-half {
+      font-weight: 700;
+      background: var(--caja-bg);
+      width: 20%;
+      color: var(--text-muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .actividad-table-word td.word-value-half {
+      font-weight: 400;
+      width: 30%;
+    }
   </style>
+  <script src="actividades.js"></script>
 </head>
 <body>
 
@@ -2547,6 +2604,153 @@
       }, 3500);
     }
 
+    function normalizeKey(text) {
+      if (!text) return "";
+      return text.toLowerCase()
+                 .trim()
+                 .normalize("NFD")
+                 .replace(/[\u0300-\u036f]/g, "") // Eliminar acentos
+                 .replace(/ñ/g, "n")
+                 .replace(/[^a-z0-9]/g, "");
+    }
+
+    function findActivityData(unidadName, actividadName) {
+      if (typeof ACTIVIDADES_COMPLETAS === 'undefined') return null;
+      
+      const unitNorm = normalizeKey(unidadName);
+      const actNorm = normalizeKey(actividadName);
+      
+      if (!unitNorm || !actNorm) return null;
+      
+      let dictionaries = [];
+      if (unitNorm === "rutas") {
+        if (ACTIVIDADES_COMPLETAS["rutaspandora"]) dictionaries.push(ACTIVIDADES_COMPLETAS["rutaspandora"]);
+        if (ACTIVIDADES_COMPLETAS["rutasicaro"]) dictionaries.push(ACTIVIDADES_COMPLETAS["rutasicaro"]);
+      } else {
+        let mappedUnit = unitNorm;
+        if (unitNorm.includes("tropa") || unitNorm.includes("exploradores")) {
+          mappedUnit = "exploradores";
+        }
+        if (ACTIVIDADES_COMPLETAS[mappedUnit]) {
+          dictionaries.push(ACTIVIDADES_COMPLETAS[mappedUnit]);
+        } else {
+          dictionaries.push(ACTIVIDADES_COMPLETAS[unitNorm] || {});
+        }
+      }
+      
+      // 1. Coincidencia exacta
+      for (const dict of dictionaries) {
+        if (dict[actNorm]) {
+          return dict[actNorm];
+        }
+      }
+      
+      // 2. Coincidencia por subcadena
+      for (const dict of dictionaries) {
+        for (const key in dict) {
+          if (actNorm.includes(key) || key.includes(actNorm)) {
+            return dict[key];
+          }
+        }
+      }
+      
+      // 3. Búsqueda difusa por tokens significativos
+      const stopWords = new Set(["de", "la", "el", "y", "en", "para", "con", "un", "una", "del", "al", "los", "las", "a", "o", "u", "e"]);
+      const getTokens = (str) => {
+        return str.toLowerCase()
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .replace(/ñ/g, "n")
+                  .split(/[^a-z0-9]+/)
+                  .filter(token => token.length > 1 && !stopWords.has(token));
+      };
+      
+      const targetTokens = getTokens(actividadName);
+      if (targetTokens.length === 0) return null;
+      
+      let bestMatch = null;
+      let bestScore = 0;
+      
+      for (const dict of dictionaries) {
+        for (const key in dict) {
+          const originalTitle = dict[key].original_title || "";
+          const candidateTokens = getTokens(originalTitle);
+          if (candidateTokens.length === 0) continue;
+          
+          let matches = 0;
+          targetTokens.forEach(t => {
+            if (candidateTokens.includes(t)) matches++;
+          });
+          
+          const score = matches / Math.max(targetTokens.length, candidateTokens.length);
+          if (score > bestScore && score >= 0.35) {
+            bestScore = score;
+            bestMatch = dict[key];
+          }
+        }
+      }
+      
+      return bestMatch;
+    }
+
+    function renderWordTable(rows) {
+      if (!rows || rows.length === 0) return "";
+      
+      let html = `<table class="actividad-table-word">`;
+      rows.forEach(row => {
+        if (row.length === 1) {
+          html += `
+            <tr>
+              <td colspan="100%" style="font-weight: 600; padding: 8px 12px; background: var(--border); font-size: 11px; color: var(--text-muted); text-align: center;">
+                ${escapeHtml(row[0])}
+              </td>
+            </tr>
+          `;
+        } else if (row.length === 2) {
+          const isDesc = ["DESCRIPCION", "DESCRIPCIÓN", "DESARROLLO", "DESCRIPCIÓN Y DESARROLLO", "DESCRIPCION Y DESARROLLO"].includes(row[0].toUpperCase().trim());
+          const labelClass = "word-label";
+          const valStyle = isDesc ? 'font-size: 12.5px; line-height: 1.5; color: var(--text);' : '';
+          
+          html += `
+            <tr>
+              <td class="${labelClass}">${escapeHtml(row[0])}</td>
+              <td class="word-value" colspan="3" style="${valStyle}">${escapeHtml(row[1])}</td>
+            </tr>
+          `;
+        } else if (row.length === 4) {
+          html += `
+            <tr>
+              <td class="word-label-half">${escapeHtml(row[0])}</td>
+              <td class="word-value-half">${escapeHtml(row[1])}</td>
+              <td class="word-label-half">${escapeHtml(row[2])}</td>
+              <td class="word-value-half">${escapeHtml(row[3])}</td>
+            </tr>
+          `;
+        } else {
+          html += `<tr>`;
+          row.forEach((cell, idx) => {
+            if (row.length % 2 === 0) {
+              if (idx % 2 === 0) {
+                html += `<td class="word-label-half">${escapeHtml(cell)}</td>`;
+              } else {
+                html += `<td class="word-value-half">${escapeHtml(cell)}</td>`;
+              }
+            } else {
+              if (idx === 0) {
+                html += `<td class="word-label" style="width: 25%;">${escapeHtml(cell)}</td>`;
+              } else {
+                html += `<td class="word-value" colspan="100%">${escapeHtml(cell)}</td>`;
+              }
+            }
+          });
+          html += `</tr>`;
+        }
+      });
+      
+      html += `</table>`;
+      return html;
+    }
+
     function showTrazabilidadModal(materialName) {
       const mat = appData.materiales.find(m => m.material === materialName);
       if (!mat) {
@@ -2556,10 +2760,98 @@
       
       document.getElementById("trazabilidad-modal-material-name").textContent = mat.material;
       
-      // Formatear el detalle como una tabla pero más espaciosa
-      const tableHtml = formatDetalleAsTable(mat.detalle);
-      document.getElementById("trazabilidad-modal-content").innerHTML = tableHtml;
+      if (!mat.detalle) {
+        document.getElementById("trazabilidad-modal-content").innerHTML = `
+          <p style="color: var(--text-muted); text-align: center; padding: 20px;">Sin detalles de trazabilidad.</p>
+        `;
+        openModal("modal-trazabilidad-detail");
+        return;
+      }
       
+      const lines = mat.detalle.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      let html = "";
+      
+      lines.forEach(line => {
+        let unidad = "";
+        let actividad = "";
+        let texto = "";
+        
+        const openQuoteIdx = line.indexOf("«");
+        const closeQuoteIdx = line.lastIndexOf("»");
+        
+        if (openQuoteIdx !== -1 && closeQuoteIdx !== -1 && closeQuoteIdx > openQuoteIdx) {
+          texto = line.substring(openQuoteIdx + 1, closeQuoteIdx).trim();
+          const resto = line.substring(0, openQuoteIdx).trim();
+          const restoClean = resto.replace(/:+$/, "").trim();
+          const firstDashIdx = restoClean.indexOf("-");
+          if (firstDashIdx !== -1) {
+            unidad = restoClean.substring(0, firstDashIdx).trim();
+            actividad = restoClean.substring(firstDashIdx + 1).trim();
+          } else {
+            unidad = restoClean;
+            actividad = "-";
+          }
+        } else {
+          const firstDashIdx = line.indexOf("-");
+          if (firstDashIdx !== -1) {
+            unidad = line.substring(0, firstDashIdx).trim();
+            const resto = line.substring(firstDashIdx + 1).trim();
+            const lastColonIdx = resto.lastIndexOf(":");
+            if (lastColonIdx !== -1) {
+              actividad = resto.substring(0, lastColonIdx).trim();
+              texto = resto.substring(lastColonIdx + 1).trim();
+            } else {
+              actividad = resto;
+              texto = "-";
+            }
+          } else {
+            unidad = "General";
+            actividad = "-";
+            texto = line;
+          }
+        }
+        
+        actividad = actividad.replace(/:+$/, "").trim();
+        
+        const badgeClass = getUnitBadgeClass(unidad);
+        const actData = findActivityData(unidad, actividad);
+        
+        let descHtml = "";
+        if (actData && actData.rows && actData.rows.length > 0) {
+          descHtml = `
+            <div class="desc-completa-box" style="margin-top: 10px; padding: 12px; background: var(--bg); border-left: 4px solid var(--primary); border-radius: 8px; font-size: 13px; color: var(--text);">
+              <div style="font-weight: 700; margin-bottom: 8px; font-size: 12.5px; color: var(--primary); display: flex; align-items: center; gap: 4px;">
+                📝 Ficha de Actividad Completa (Word original):
+              </div>
+              <div style="overflow-x: auto; width: 100%; border-radius: 8px;">
+                ${renderWordTable(actData.rows)}
+              </div>
+            </div>
+          `;
+        } else {
+          descHtml = `
+            <div class="desc-completa-box" style="margin-top: 10px; padding: 10px; background: var(--caja-bg); border-radius: 4px; font-size: 12px; color: var(--text-muted); font-style: italic; text-align: left;">
+              No se encontró la ficha completa de esta actividad en los documentos Word.
+            </div>
+          `;
+        }
+        
+        html += `
+          <div class="modal-actividad-card" style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; background: var(--card-bg);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+              <span class="badge ${badgeClass}" style="font-size: 11px; padding: 4px 10px;">${unidad}</span>
+              <span style="font-weight: 700; color: var(--text); font-size: 14px;">${actividad}</span>
+            </div>
+            <div style="font-size: 13px; margin-bottom: 8px; color: var(--text); text-align: left;">
+              <span style="color: var(--text-muted); font-weight: 500;">Material solicitado literal:</span> 
+              <span class="val-bold" style="color: var(--accent-orange); font-size: 13.5px;">«${texto || "-"}»</span>
+            </div>
+            ${descHtml}
+          </div>
+        `;
+      });
+      
+      document.getElementById("trazabilidad-modal-content").innerHTML = html;
       openModal("modal-trazabilidad-detail");
     }
 
