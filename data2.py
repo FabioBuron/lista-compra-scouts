@@ -17,7 +17,7 @@ RAW2["EXPLORADORES"] = [
 ("M-21/07 tarde","Taller pulseras con Castores","Cordino (1.5 m por participante)"),
 ("M-21/07 noche","Teleclub","Caja de juegos: Gobbit, baraja de cartas, Jungle Speed, Virus..."),
 ("X-22/07 tarde 1","Actividad Clan Ícaro (Trivial)","Tablero de trivial (impreso); Dados; Fichas; Frisbee; Poto; Balón; Pelotas de pin pon"),
-("X-22/07 tarde 2","Jugger","Escudos; Lanzas; Dobles; Espadas; Pelota jugger; Cinta americana; Silbato"),
+("X-22/07 tarde 2","Jugger","Escudos; Lanzas; Dobles espadas; Pelota jugger; Cinta americana; Silbato"),
 ("X-22/07 noche","Velada de terror","5 pieles de kiwi; 1 bote de espárragos; 1 paquete de chía; 1 caja; 1 llave; 10 lonas; 10 mantas; Espaguetis; 3 campanas; 5 vendas o pañuelos; Máscaras (las del año pasado)"),
 ("J-23/07 mañana","Servicio en el pueblo","Pendiente del voluntariado, se suelen necesitar: Guantes; Chalecos reflectantes"),
 ("J-23/07 tarde 1","Pruebas Herberth","Puzzles de las bases"),
@@ -40,7 +40,7 @@ RAW2["EXPLORADORES"] = [
 
 RAW2["PIONEROS"] = [
 ("J-16 y V-17/07","Construcciones","10m sombrajo; 100m cuerda pita; 5 listones (puerta + sombrajo); Alcotanas"),
-("V-17/07 tarde","Gymkhana deportes","Bancos, mesa (circuito); Conos bajos de colores; Cuerda gorda (sogatira); Palas de playa y pelota; Palas de ping pong y pelotitas; Red de volleyball; Petanca; Medallas de goma eva (las hace el kraalete)"),
+("V-17/07 tarde","Gymkhana deportes","Bancos, mesa (circuito); Conos bajos de colores; Cuerda gorda (sogatira); Palas de playa y pelota; Palas de ping pong y pelotitas; Red de volleyball; Petanca; Ejercicios mentales: Kraalete; Medallas de goma eva (las hace el kraalete)"),
 ("V-17/07 noche","Taller de estrellas","Cartulinas amarillas 2 A4; Precinto; Bolígrafos/Rotus; Tijeras; Cuento/leyendas de estrellas; Aislantes (los suyos)"),
 ("S-18/07 tarde 1","Actividad Clan Ícaro - Drogas","Papel; Boli; Botellas de plástico; Algodón; Cigarrillos; Mechero; Balde; Cartas"),
 ("S-18/07 tarde 2","Preparación volantes","Comida volantes y menaje; Botiquín pequeño; Rafias"),
@@ -124,7 +124,7 @@ RAW2["RUTAS ICARO"] = [
 ("V-24/07","Técnicas scouts (brújula casera, potabilizar)","Brújulas; Papel; Bolis; Pañoleta con tochos; Camping gas; Mechero; Harina; Sal; Agua; Lona; Cuerda; Piquetas; Botella de plástico; Arena fina; Arena gruesa; Carbón vegetal"),
 ("S-25/07","Jugger con Pandora","Armas de jugger; Balón de rugby"),
 ("S-26/07","Revisar olimpiadas + hacer premios","Goma eva de muchos colores (bastante); Ovillo de lana; Plumas; Rotulador punta fina; Abalorios"),
-("D-26/07 noche","Stalking con Pandora y pipis","(Sin material listado)"),
+("D-26/07 noche","Stalking con Pandora y pipis","Frontales; Papeles; Bolis"),
 ("L-27/07","Preparación de raids","Lumis; Mapas"),
 ("L-27 a M-28/07","Raids","Comida raids; Chalecos reflectantes; Reflexiones (Vali); Patatas cocidas; Huevos cocidos; Papel higiénico; Bolsas de basura"),
 ("X-29/07 mañana","OLIMPIADAS (grupal)","Hierros de tiendas de 3-4 tamaños; Bancos del comedor; Balón; Mantas; Cuerda pita; Martillo; Clavos; Potos/vasos; Pelotas de pin-pon; Dos pañoletas; Vaso de plástico; Velas; Mechero; Sacos para carrera de sacos"),
