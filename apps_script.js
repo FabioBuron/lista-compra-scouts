@@ -25,6 +25,7 @@ function doGet(e) {
       e.parameter.exploradores,
       e.parameter.pioneros,
       e.parameter.rutas,
+      e.parameter.comisiones,
       e.parameter.tipo,
       e.parameter.detalle
     );
@@ -63,6 +64,7 @@ function doPost(e) {
       data.exploradores,
       data.pioneros,
       data.rutas,
+      data.comisiones,
       data.tipo,
       data.detalle
     );
@@ -106,6 +108,7 @@ function readAllData() {
     if (parseFloat(row[5]) > 0 || (row[5] && row[5].toString().startsWith("="))) quienPide.push("Exploradores");
     if (parseFloat(row[6]) > 0 || (row[6] && row[6].toString().startsWith("="))) quienPide.push("Pioneros");
     if (parseFloat(row[7]) > 0 || (row[7] && row[7].toString().startsWith("="))) quienPide.push("Rutas");
+    if (parseFloat(row[8]) > 0 || (row[8] && row[8].toString().startsWith("="))) quienPide.push("Comisiones");
     
     materiales.push({
       material: row[0],
@@ -117,10 +120,11 @@ function readAllData() {
       exploradores: row[5],
       pioneros: row[6],
       rutas: row[7],
-      tipo: row[8],
-      detalle: row[9],
-      resumenCaja: row[10] || "",
-      comprado: (row[11] || "").toString().trim().toUpperCase() === "SÍ" || (row[11] || "").toString().trim().toUpperCase() === "COMPRADO"
+      comisiones: row[8],
+      tipo: row[9],
+      detalle: row[10],
+      resumenCaja: row[11] || "",
+      comprado: (row[12] || "").toString().trim().toUpperCase() === "SÍ" || (row[12] || "").toString().trim().toUpperCase() === "COMPRADO"
     });
   }
   
@@ -174,7 +178,7 @@ function updatePurchase(material, status) {
   for (var i = 1; i < values.length; i++) {
     if (values[i][0].toString().trim() === material.toString().trim()) {
       var valueToSet = (status === "true" || status === true) ? "SÍ" : "";
-      sheet.getRange(i + 1, 12).setValue(valueToSet); // Columna L (12)
+      sheet.getRange(i + 1, 13).setValue(valueToSet); // Columna M (13)
       found = true;
       break;
     }
@@ -244,14 +248,14 @@ function updateCajaResumenPrincipal(ss, material) {
   var valuesLista = sheetLista.getDataRange().getValues();
   for (var j = 1; j < valuesLista.length; j++) {
     if (valuesLista[j][0].toString().trim() === material.toString().trim()) {
-      sheetLista.getRange(j + 1, 11).setValue(resumenText); // Columna K (11)
+      sheetLista.getRange(j + 1, 12).setValue(resumenText); // Columna L (12)
       break;
     }
   }
 }
 
 // ── AÑADIR NUEVO MATERIAL A LA LISTA ──
-function addMaterial(material, categoria, castores, lobatos, exploradores, pioneros, rutas, tipo, detalle) {
+function addMaterial(material, categoria, castores, lobatos, exploradores, pioneros, rutas, comisiones, tipo, detalle) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName("LISTA DE LA COMPRA");
   if (!sheet) return jsonResponse({ error: "Hoja 'LISTA DE LA COMPRA' no encontrada" });
@@ -270,10 +274,11 @@ function addMaterial(material, categoria, castores, lobatos, exploradores, pione
   var e = parseFloat(exploradores) || 0;
   var p = parseFloat(pioneros) || 0;
   var r = parseFloat(rutas) || 0;
+  var com = parseFloat(comisiones) || 0;
   
   var nextRow = sheet.getLastRow() + 1;
   // Columna C: fórmula de suma automática de las unidades
-  var formulaTotal = "=SUM(D" + nextRow + ":H" + nextRow + ")";
+  var formulaTotal = "=SUM(D" + nextRow + ":I" + nextRow + ")";
   
   sheet.appendRow([
     material,
@@ -284,6 +289,7 @@ function addMaterial(material, categoria, castores, lobatos, exploradores, pione
     e > 0 ? e : "",
     p > 0 ? p : "",
     r > 0 ? r : "",
+    com > 0 ? com : "",
     tipo,
     detalle,
     "", // Resumen cajas vacío

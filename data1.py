@@ -78,8 +78,4 @@ RAW["LOBATOS"] = [
 ("M-28/07 tarde-noche","Olimpiadas tarde + vivacs","Lonas impermeables; Picas; Cuerda; Martillos o maza; Cuerda pita; Conos; Folios; Bolis; Saco y cuerda gorda; 5 aros pequeños para prender; Pañuelos de colores (x8); Alambre; Gasolina; Mechero"),
 ("X-29/07 tarde","Tipi indio - Miss y Mister","Folios de colores; Rotuladores; Cola; Tijeras; Palillos de madera largos; Una caja de cartón; Un ovillo de lana"),
 ("X-29/07 tarde 2","Evaluación","Folios; Bolis; Papel crepé verde, rojo y amarillo"),
-("J-16/07 noche","GRUPAL: Velada inicial","(De la descripción) Frontales y linternas; Manojo de llaves; Pinturas para caracterizar villanos; Velos/telas"),
-("S-18/07 mañana","GRUPAL: Gran Juego","Lona de papel grande para panel central; Papeles más pequeños o varias lonas grandes; Pinturas de cara o maquillaje; Pinturas o rotuladores; Cubos de plástico; Harina (alternativa para celíacos); Gominolas de corazones; Telas o algo para disfrazarse; Pañoletas o tela para tapar ojos"),
-("X-22/07 día","GRUPAL: Día guarro","Altavoz; Plátanos (20-30); Paquetes de galletas (3-5); Yogures (20-30); Cuerdas largas (2-3); Miel; Varios botes de especias; Vinagre; Ketchup; Mayonesa; Vasitos o cucharitas; Alimentos variados para cata (6-10 tipos); Barreños (6-8); Esponjas (10-15); Polvos Holi ecológicos (mirar los del año pasado)"),
-("D-26/07 tarde","GRUPAL: Barracas - El Gran Bazar","(De la descripción) Garbanzos dorados (rupias); Baraja de cartas; Balde de agua; Canicas; Saco de seda; 3 cilindros con dibujos (tragaperras); 100 boletos lotería; Latas de coca-cola con piedras; Placa de cartón + puntas (plinko); Dado gigante; Pelotas de ping pong; Vasija; Vaso de chupito; Monedas de céntimo; Aro y cono"),
 ]

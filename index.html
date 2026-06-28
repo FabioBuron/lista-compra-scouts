@@ -1304,6 +1304,7 @@
             <option value="PIONEROS">Pioneros</option>
             <option value="RUTAS PANDORA">Rutas Pandora</option>
             <option value="RUTAS ICARO">Rutas Ícaro</option>
+            <option value="COMISIONES">Comisiones</option>
           </select>
         </div>
         <div class="filter-item">
@@ -1726,6 +1727,9 @@
         }
         if (parseFloat(m.rutas) > 0 || (m.rutas && m.rutas.toString().startsWith("="))) {
           desgloseUnidades += `<span class="badge badge-rutas" style="margin-bottom:2px;">Rutas: ${m.rutas}</span> `;
+        }
+        if (parseFloat(m.comisiones) > 0 || (m.comisiones && m.comisiones.toString().startsWith("="))) {
+          desgloseUnidades += `<span class="badge" style="margin-bottom:2px; background-color: #7B1FA2; color: white;">Comisiones: ${m.comisiones}</span> `;
         }
         if (!desgloseUnidades) desgloseUnidades = `<span class="badge badge-muted">${m.quien}</span>`;
         
